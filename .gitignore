@@ -41,5 +41,8 @@ tokens.csv
 ### macOS ###
 .DS_Store
 
+### CodeGraph ###
+.codegraph/
+
 ### Cursor ###
 .cursor/
