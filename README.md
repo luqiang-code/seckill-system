@@ -235,3 +235,131 @@ jmeter -n -t jmeter/seckill-stress-test.jmx -l result.jtl
 | 库存分段 | 单 key (Lua) | 10 段 + CAS 本地扣减 | 05-18 |
 
 > 详见 `docs/adr/stress-test-qps-2026-05-14.md` 和 `docs/adr/stress-test-pipeline-2026-05-18.md`
+
+## 知识图谱 (Knowledge Graph)
+
+> 由 `understand-anything` 自动生成，数据来源：`.understand-anything/knowledge-graph.json`。运行 `/understand` 重建，`/understand-dashboard` 可视化浏览。
+
+### 代码统计
+
+| 类型 | 数量 | 说明 |
+|------|------|------|
+| 总文件 | 59 | 37 代码 / 8 文档 / 4 配置 / 3 数据 / 3 标记 / 2 脚本 / 2 基础设施 |
+| 总节点 | 128 | 43 文件, 37 函数, 28 类, 8 文档, 6 表, 4 配置, 2 服务 |
+| 总边 | 210 | 69 包含, 62 导出, 40 导入, 10 调用, 9 关联, 5 文档化, +13 其他 |
+| 分析语言 | 12 | Java, Markdown, SQL, YAML, Dockerfile, HTML, Shell, XML, JMX, Conf, Properties, Batch |
+
+### 架构分层
+
+```
+┌──────────────────────────────────────────────────────┐
+│  API Layer (5)                                       │
+│  SeckillController AuthController GoodsController    │
+│  dashboard.html seckill.html                         │
+└────────────────────────┬─────────────────────────────┘
+                         │ calls
+┌────────────────────────▼─────────────────────────────┐
+│  Service Layer (8)                                   │
+│  SeckillServiceImpl OrderQueueService                │
+│  OrderPersistScheduler OrderCancelScheduler          │
+│  SeckillSystemApplication                            │
+└──────┬─────────────────────────────────┬─────────────┘
+       │ depends_on                      │ depends_on
+┌──────▼──────────┐            ┌─────────▼─────────────┐
+│  Common (12)    │            │  Data Layer (12)      │
+│  LocalStockCache│            │  Goods OrderInfo      │
+│  BloomFilter    │            │  GoodsRepository      │
+│  CacheConstants │            │  OrderInfoRepository  │
+│  TokenBucketRL  │            │  GoodsMapper          │
+│  JwtUtil        │            │  schema.sql data.sql  │
+│  ApiResponse    │            │  docker/mysql/init.sql│
+│  RedisUtil      │            └───────────────────────┘
+│  GlobalExHandler│
+│  JwtAuthInterc. │
+│  RateLimiterInt.│
+│  RedisConfig    │
+│  WebConfig      │
+└─────────────────┘
+
+┌──────────────────────────────────────────────────────┐
+│  Infrastructure (5)  │  Configuration (8)            │
+│  Dockerfile          │  pom.xml application.yml      │
+│  docker-compose.yml  │  application-docker.yml       │
+│  redis.conf          │  mvnw mvnw.cmd .gitattributes │
+│  sentinel.conf       │                               │
+│  sentinel-entry.sh   │                               │
+├──────────────────────┼───────────────────────────────┤
+│  Documentation (9)   │  Test (4)                     │
+│  README.md           │  SeckillSystemAppTests.java   │
+│  CLAUDE.md           │  seckill-stress-test.jmx      │
+│  docs/adr/* (2)      │  seckill-pure-test.jmx        │
+│  docs/agents/* (3)   │                               │
+│  docs/load-test.md   │                               │
+│  jmeter/dashboard    │                               │
+└──────────────────────┴───────────────────────────────┘
+```
+
+### 节点类型分布
+
+| 类型 | 数量 | 说明 |
+|------|------|------|
+| `file` | 43 | Java 源码、配置脚本等源文件 |
+| `function` | 37 | 关键业务方法（CAS 扣减、Pipeline 批量、JWT 签发等） |
+| `class` | 28 | Java 类、接口、实体 |
+| `document` | 8 | Markdown 文档（README, ADR, CLAUDE.md 等） |
+| `table` | 6 | 数据库表定义（seckill_goods, seckill_order） |
+| `config` | 4 | YAML/XML 配置文件 |
+| `service` | 2 | Dockerfile 和 docker-compose 服务定义 |
+
+### 边类型分布
+
+| 类型 | 数量 | 语义 |
+|------|------|------|
+| `contains` | 69 | 文件包含类 / 类包含方法 |
+| `exports` | 62 | 类/方法对外暴露符号 |
+| `imports` | 40 | 文件间依赖导入 |
+| `calls` | 10 | 方法间调用关系 |
+| `related` | 9 | 语义关联（文档间、配置间） |
+| `documents` | 5 | 文档化关系 |
+| `depends_on` | 4 | 服务/模块依赖 |
+| `configures` | 3 | 配置文件关联到入口 |
+| `defines_schema` | 3 | SQL schema 定义实体映射 |
+| `implements` | 2 | 接口实现 |
+| `deploys` | 2 | 部署关系 |
+| `tested_by` | 1 | 测试覆盖 |
+
+### 核心节点 (按连接度 Top 10)
+
+| 文件 | 边数 | 角色 |
+|------|------|------|
+| `SeckillServiceImpl` | 18 | 核心秒杀服务（fan-out 最高，依赖 9 个模块） |
+| `SeckillSystemApplication` | 16 | Spring Boot 入口 + 库存初始化 |
+| `OrderQueueService` | 15 | Redis 队列 + Lua 原子操作 |
+| `LocalStockCache` | 12 | CAS 本地库存缓存（热点 key 防护） |
+| `SeckillController` | 11 | REST API 入口 |
+| `BloomFilter` | 10 | RBloomFilter 防穿透 |
+| `Goods` | 10 | 核心实体 |
+| `ApiResponse` | 9 | 统一响应体（被 9 个文件引用） |
+| `GoodsServiceImpl` | 9 | 商品缓存策略实现 |
+| `OrderPersistScheduler` | 9 | 批量落库调度器 |
+
+### 复杂度分布
+
+| 等级 | 文件 |
+|------|------|
+| **complex** | `LocalStockCache.java`, `SeckillServiceImpl.java`, `dashboard.html`, `mvnw`, `seckill.html` |
+| **moderate** | `SeckillSystemApplication.java`, `BloomFilter.java`, `OrderCancelScheduler.java`, `JwtUtil.java`, `SeckillController.java`, `OrderInfo.java`, `JwtAuthInterceptor.java`, `GoodsServiceImpl.java`, `redis.conf`, `seckill-pure-test.jmx`, `seckill-stress-test.jmx`, `OrderPersistScheduler.java`, `OrderQueueService.java` |
+| **simple** | 其余 41 个文件 |
+
+### 学习导览
+
+1. **项目概览** — README.md, 了解系统架构和核心设计理念
+2. **应用入口与配置** — SeckillSystemApplication + application.yml
+3. **数据模型与数据库架构** — Goods + OrderInfo + schema.sql
+4. **REST API 层** — SeckillController + GoodsController + ApiResponse
+5. **核心秒杀服务** — SeckillService + SeckillServiceImpl (最复杂模块)
+6. **本地库存缓存与性能优化** — LocalStockCache + BloomFilter + CacheConstants
+7. **订单持久化流水线** — OrderQueueService + OrderPersistScheduler + OrderCancelScheduler
+8. **容器化与部署架构** — Dockerfile + docker-compose.yml + redis.conf
+
+> **交互式浏览**: 运行 `/understand-dashboard` 启动可视化仪表盘，查看节点关系图、架构分层和完整导览。知识图谱通过 `/understand --auto-update` 可配置为提交时自动增量更新。

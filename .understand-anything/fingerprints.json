@@ -1,0 +1,2940 @@
+{
+  "version": "1.0.0",
+  "gitCommitHash": "90984d54e40abe21be5b8b1e54443097d3946524",
+  "generatedAt": "2026-05-25T03:19:50.107Z",
+  "files": {
+    ".gitattributes": {
+      "filePath": ".gitattributes",
+      "contentHash": "5775a77ad2f6d12dde053a3fb0cca4309189163f0888f4e7e984cd0ab327028b",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 3,
+      "hasStructuralAnalysis": false
+    },
+    ".mvn/wrapper/maven-wrapper.properties": {
+      "filePath": ".mvn/wrapper/maven-wrapper.properties",
+      "contentHash": "b0ffaf47bfff05e4f8d05fdc32936382b3dff70efc6e8a480c42ae49aa04dc93",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 4,
+      "hasStructuralAnalysis": false
+    },
+    ".understand-anything/.understandignore": {
+      "filePath": ".understand-anything/.understandignore",
+      "contentHash": "178739c742db86ca461a1bb477ab881bd3eaeafadf75ea7ba65840d4c512bdf3",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 48,
+      "hasStructuralAnalysis": false
+    },
+    "CLAUDE.md": {
+      "filePath": "CLAUDE.md",
+      "contentHash": "41b9b2331c8475cc6900e26efa6b2f08f0e3c1b27d744f2055c86c1e471096b7",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 80,
+      "hasStructuralAnalysis": true
+    },
+    "config/redis.conf": {
+      "filePath": "config/redis.conf",
+      "contentHash": "330667c9a79544b96a3efb117d2a257fbc3549d54c738e9d65b2666357db52de",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 45,
+      "hasStructuralAnalysis": false
+    },
+    "config/sentinel-entrypoint.sh": {
+      "filePath": "config/sentinel-entrypoint.sh",
+      "contentHash": "822cc2daaa42d6778c2b7e09d40455da4580c246092ea375167d04e743916de3",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 17,
+      "hasStructuralAnalysis": true
+    },
+    "config/sentinel.conf": {
+      "filePath": "config/sentinel.conf",
+      "contentHash": "a2a590c5524d353f54daa3470c164a5a56af8f97c2e2ebd92d3f94cd88b079e8",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 20,
+      "hasStructuralAnalysis": false
+    },
+    "docker-compose.yml": {
+      "filePath": "docker-compose.yml",
+      "contentHash": "7f20d3f287c5515a7cd9e428bc7d8c9f9cb4bf28d1cc58d61a21f538b61e7c5c",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 125,
+      "hasStructuralAnalysis": true
+    },
+    "docker/mysql/init.sql": {
+      "filePath": "docker/mysql/init.sql",
+      "contentHash": "85af66bd86d8bf77a22416dcc5a94f190a4d128b4f98b16a4b239caa9aeacd18",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 27,
+      "hasStructuralAnalysis": true
+    },
+    "Dockerfile": {
+      "filePath": "Dockerfile",
+      "contentHash": "cd43dd4cc1f99910c9a21864e0afb30aa504e8ae49fbc49d417a210240b27ae3",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 9,
+      "hasStructuralAnalysis": true
+    },
+    "docs/adr/stress-test-pipeline-2026-05-18.md": {
+      "filePath": "docs/adr/stress-test-pipeline-2026-05-18.md",
+      "contentHash": "26dc79e3811d67a07ad9c09f3003b938b8ae24f0228e83f654a57b271b7c3557",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 144,
+      "hasStructuralAnalysis": true
+    },
+    "docs/adr/stress-test-qps-2026-05-14.md": {
+      "filePath": "docs/adr/stress-test-qps-2026-05-14.md",
+      "contentHash": "3c8644e4dac3c1d89031698f70d81ad4dcd6cee6eb97d53337f1b4cfbf560159",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 94,
+      "hasStructuralAnalysis": true
+    },
+    "docs/agents/domain.md": {
+      "filePath": "docs/agents/domain.md",
+      "contentHash": "a8cc3d1c11c9cdea455f39c4090cf61ac273f2474dd6f229ab0c2b9b1deec759",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 52,
+      "hasStructuralAnalysis": true
+    },
+    "docs/agents/issue-tracker.md": {
+      "filePath": "docs/agents/issue-tracker.md",
+      "contentHash": "f0e138631d1fc8aedc9e05d25bc688b97679f81eae7a7c760dd35e0790568370",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 23,
+      "hasStructuralAnalysis": true
+    },
+    "docs/agents/triage-labels.md": {
+      "filePath": "docs/agents/triage-labels.md",
+      "contentHash": "4f53c9b40ce2651e3611aa090eaedbd6dbc9b71ef8c5f7e65eac0d8263190d0d",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 16,
+      "hasStructuralAnalysis": true
+    },
+    "docs/load-test-report.md": {
+      "filePath": "docs/load-test-report.md",
+      "contentHash": "01b8d9d0a977532d75d8918ae97fa34e83432dde49c61a73bf18dc4f683d5d00",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 156,
+      "hasStructuralAnalysis": true
+    },
+    "jmeter/dashboard.html": {
+      "filePath": "jmeter/dashboard.html",
+      "contentHash": "dd4d9c8a4dea7aeb9881e2c21db4a606ae2055637d4941b204d434ec1fe431ae",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 262,
+      "hasStructuralAnalysis": false
+    },
+    "jmeter/seckill-pure-test.jmx": {
+      "filePath": "jmeter/seckill-pure-test.jmx",
+      "contentHash": "e2fdd1c0728ff7e4d41f39482e7791e0b95e13be18a14cfe64ac1f076d0d2fb2",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 99,
+      "hasStructuralAnalysis": false
+    },
+    "jmeter/seckill-stress-test.jmx": {
+      "filePath": "jmeter/seckill-stress-test.jmx",
+      "contentHash": "a1254b30434c23159408b3de6e05e58d711d7fb1466644f8bbcb11e269289ff6",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 150,
+      "hasStructuralAnalysis": false
+    },
+    "mvnw": {
+      "filePath": "mvnw",
+      "contentHash": "cae96cef89ebea3531221f4ae17c23cf8edf67d00eae8306d4186ae1bbed4d02",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 296,
+      "hasStructuralAnalysis": false
+    },
+    "mvnw.cmd": {
+      "filePath": "mvnw.cmd",
+      "contentHash": "4a361e1374a3e5ad6d03e18e9adc0cf181ac5058ac6203b76f0ba3b456b56481",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 190,
+      "hasStructuralAnalysis": false
+    },
+    "pom.xml": {
+      "filePath": "pom.xml",
+      "contentHash": "420c7d78bfbbbf6f1d34d3c01940e0f685dcf168b6f168d632d223bc46eefa70",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 118,
+      "hasStructuralAnalysis": false
+    },
+    "README.md": {
+      "filePath": "README.md",
+      "contentHash": "3b92042c74b320ee234834d56187c3d33654a3646cddb0517b83ebaedba1ed54",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 238,
+      "hasStructuralAnalysis": true
+    },
+    "src/main/java/com/luqiang/seckill/common/ApiResponse.java": {
+      "filePath": "src/main/java/com/luqiang/seckill/common/ApiResponse.java",
+      "contentHash": "fdef78593e9450596666555ebf96eb5d72402c7a21a48db4ecc203d7a637fc89",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 13,
+      "hasStructuralAnalysis": true
+    },
+    "src/main/java/com/luqiang/seckill/common/BloomFilter.java": {
+      "filePath": "src/main/java/com/luqiang/seckill/common/BloomFilter.java",
+      "contentHash": "7d328549e47b780a4c83a155a5111fde285b30af29e915af6c9852f5696b1dfe",
+      "functions": [
+        {
+          "name": "BloomFilter",
+          "params": [
+            "redisTemplate"
+          ],
+          "exported": true,
+          "lineCount": 3
+        },
+        {
+          "name": "add",
+          "params": [
+            "goodsId"
+          ],
+          "returnType": "void",
+          "exported": true,
+          "lineCount": 6
+        },
+        {
+          "name": "mightContain",
+          "params": [
+            "goodsId"
+          ],
+          "returnType": "boolean",
+          "exported": true,
+          "lineCount": 10
+        },
+        {
+          "name": "initAll",
+          "params": [
+            "goodsIds"
+          ],
+          "returnType": "void",
+          "exported": true,
+          "lineCount": 11
+        },
+        {
+          "name": "positions",
+          "params": [
+            "value"
+          ],
+          "returnType": "int[]",
+          "exported": false,
+          "lineCount": 10
+        }
+      ],
+      "classes": [
+        {
+          "name": "BloomFilter",
+          "methods": [
+            "BloomFilter",
+            "add",
+            "mightContain",
+            "initAll",
+            "positions"
+          ],
+          "properties": [
+            "log",
+            "BITMAP_KEY",
+            "M",
+            "K",
+            "redisTemplate"
+          ],
+          "exported": true,
+          "lineCount": 62
+        }
+      ],
+      "imports": [
+        {
+          "source": "org.slf4j.Logger",
+          "specifiers": [
+            "Logger"
+          ]
+        },
+        {
+          "source": "org.slf4j.LoggerFactory",
+          "specifiers": [
+            "LoggerFactory"
+          ]
+        },
+        {
+          "source": "org.springframework.data.redis.core.StringRedisTemplate",
+          "specifiers": [
+            "StringRedisTemplate"
+          ]
+        },
+        {
+          "source": "org.springframework.stereotype.Component",
+          "specifiers": [
+            "Component"
+          ]
+        },
+        {
+          "source": "java.util.List",
+          "specifiers": [
+            "List"
+          ]
+        }
+      ],
+      "exports": [
+        "BloomFilter",
+        "add",
+        "mightContain",
+        "initAll",
+        "BloomFilter"
+      ],
+      "totalLines": 75,
+      "hasStructuralAnalysis": true
+    },
+    "src/main/java/com/luqiang/seckill/common/CacheConstants.java": {
+      "filePath": "src/main/java/com/luqiang/seckill/common/CacheConstants.java",
+      "contentHash": "030b09a23a81d482dbe2589e5dc2a059cd1ea759fd2adf6898b0478145698141",
+      "functions": [
+        {
+          "name": "CacheConstants",
+          "params": [],
+          "exported": true,
+          "lineCount": 2
+        },
+        {
+          "name": "stockKey",
+          "params": [
+            "goodsId",
+            "segment"
+          ],
+          "returnType": "String",
+          "exported": true,
+          "lineCount": 3
+        },
+        {
+          "name": "orderKey",
+          "params": [
+            "goodsId",
+            "segment"
+          ],
+          "returnType": "String",
+          "exported": true,
+          "lineCount": 3
+        },
+        {
+          "name": "soldOutKey",
+          "params": [
+            "goodsId"
+          ],
+          "returnType": "String",
+          "exported": true,
+          "lineCount": 3
+        },
+        {
+          "name": "segmentFor",
+          "params": [
+            "userId"
+          ],
+          "returnType": "int",
+          "exported": true,
+          "lineCount": 3
+        }
+      ],
+      "classes": [
+        {
+          "name": "CacheConstants",
+          "methods": [
+            "CacheConstants",
+            "stockKey",
+            "orderKey",
+            "soldOutKey",
+            "segmentFor"
+          ],
+          "properties": [
+            "GOODS_LIST_KEY",
+            "GOODS_LIST_LOCK_KEY",
+            "GOODS_LIST_TTL_SECONDS",
+            "GOODS_LIST_TTL_RANDOM_BOUND_SECONDS",
+            "GOODS_LIST_EMPTY_TTL_SECONDS",
+            "EMPTY_CACHE_MARKER",
+            "STOCK_SEGMENTS",
+            "SOLDOUT_TTL_SECONDS",
+            "CANCEL_ZSET_KEY",
+            "CANCEL_DELAY_MS"
+          ],
+          "exported": true,
+          "lineCount": 41
+        }
+      ],
+      "imports": [],
+      "exports": [
+        "GOODS_LIST_KEY",
+        "GOODS_LIST_LOCK_KEY",
+        "GOODS_LIST_TTL_SECONDS",
+        "GOODS_LIST_TTL_RANDOM_BOUND_SECONDS",
+        "GOODS_LIST_EMPTY_TTL_SECONDS",
+        "EMPTY_CACHE_MARKER",
+        "STOCK_SEGMENTS",
+        "stockKey",
+        "orderKey",
+        "soldOutKey",
+        "SOLDOUT_TTL_SECONDS",
+        "CANCEL_ZSET_KEY",
+        "CANCEL_DELAY_MS",
+        "segmentFor",
+        "CacheConstants"
+      ],
+      "totalLines": 44,
+      "hasStructuralAnalysis": true
+    },
+    "src/main/java/com/luqiang/seckill/common/GlobalExceptionHandler.java": {
+      "filePath": "src/main/java/com/luqiang/seckill/common/GlobalExceptionHandler.java",
+      "contentHash": "860666fd644472a3f9843f5019653fe4eaa8761e9ded53b49871a32039cbf832",
+      "functions": [
+        {
+          "name": "handleConstraintViolation",
+          "params": [
+            "ex"
+          ],
+          "returnType": "ApiResponse<Void>",
+          "exported": true,
+          "lineCount": 8
+        },
+        {
+          "name": "handleMethodArgumentNotValid",
+          "params": [
+            "ex"
+          ],
+          "returnType": "ApiResponse<Void>",
+          "exported": true,
+          "lineCount": 7
+        },
+        {
+          "name": "handleException",
+          "params": [
+            "ex"
+          ],
+          "returnType": "ApiResponse<Void>",
+          "exported": true,
+          "lineCount": 4
+        }
+      ],
+      "classes": [
+        {
+          "name": "GlobalExceptionHandler",
+          "methods": [
+            "handleConstraintViolation",
+            "handleMethodArgumentNotValid",
+            "handleException"
+          ],
+          "properties": [],
+          "exported": true,
+          "lineCount": 25
+        }
+      ],
+      "imports": [
+        {
+          "source": "jakarta.validation.ConstraintViolationException",
+          "specifiers": [
+            "ConstraintViolationException"
+          ]
+        },
+        {
+          "source": "org.springframework.web.bind.MethodArgumentNotValidException",
+          "specifiers": [
+            "MethodArgumentNotValidException"
+          ]
+        },
+        {
+          "source": "org.springframework.web.bind.annotation.ExceptionHandler",
+          "specifiers": [
+            "ExceptionHandler"
+          ]
+        },
+        {
+          "source": "org.springframework.web.bind.annotation.RestControllerAdvice",
+          "specifiers": [
+            "RestControllerAdvice"
+          ]
+        }
+      ],
+      "exports": [
+        "handleConstraintViolation",
+        "handleMethodArgumentNotValid",
+        "handleException",
+        "GlobalExceptionHandler"
+      ],
+      "totalLines": 33,
+      "hasStructuralAnalysis": true
+    },
+    "src/main/java/com/luqiang/seckill/common/JwtUtil.java": {
+      "filePath": "src/main/java/com/luqiang/seckill/common/JwtUtil.java",
+      "contentHash": "08894723cc1fabe89f84483b0921a2fbcc1a677ec0d4d1aae19b1ba9416b1799",
+      "functions": [
+        {
+          "name": "generate",
+          "params": [
+            "userId"
+          ],
+          "returnType": "String",
+          "exported": true,
+          "lineCount": 9
+        },
+        {
+          "name": "parseUserId",
+          "params": [
+            "token"
+          ],
+          "returnType": "String",
+          "exported": true,
+          "lineCount": 16
+        }
+      ],
+      "classes": [
+        {
+          "name": "JwtUtil",
+          "methods": [
+            "generate",
+            "parseUserId"
+          ],
+          "properties": [
+            "SECRET",
+            "EXPIRE_MS",
+            "KEY"
+          ],
+          "exported": true,
+          "lineCount": 35
+        }
+      ],
+      "imports": [
+        {
+          "source": "io.jsonwebtoken.Claims",
+          "specifiers": [
+            "Claims"
+          ]
+        },
+        {
+          "source": "io.jsonwebtoken.JwtException",
+          "specifiers": [
+            "JwtException"
+          ]
+        },
+        {
+          "source": "io.jsonwebtoken.Jwts",
+          "specifiers": [
+            "Jwts"
+          ]
+        },
+        {
+          "source": "io.jsonwebtoken.security.Keys",
+          "specifiers": [
+            "Keys"
+          ]
+        },
+        {
+          "source": "javax.crypto.SecretKey",
+          "specifiers": [
+            "SecretKey"
+          ]
+        },
+        {
+          "source": "java.nio.charset.StandardCharsets",
+          "specifiers": [
+            "StandardCharsets"
+          ]
+        },
+        {
+          "source": "java.util.Date",
+          "specifiers": [
+            "Date"
+          ]
+        }
+      ],
+      "exports": [
+        "generate",
+        "parseUserId",
+        "JwtUtil"
+      ],
+      "totalLines": 47,
+      "hasStructuralAnalysis": true
+    },
+    "src/main/java/com/luqiang/seckill/common/LocalStockCache.java": {
+      "filePath": "src/main/java/com/luqiang/seckill/common/LocalStockCache.java",
+      "contentHash": "b57e3b584b09699959a1cfec5a4a73354648afc4faa591021adbf43548837add",
+      "functions": [
+        {
+          "name": "LocalStockCache",
+          "params": [
+            "redisTemplate"
+          ],
+          "exported": true,
+          "lineCount": 3
+        },
+        {
+          "name": "acquire",
+          "params": [
+            "stockKey",
+            "batchSize",
+            "redisTemplate"
+          ],
+          "returnType": "int",
+          "exported": true,
+          "lineCount": 62
+        },
+        {
+          "name": "rollback",
+          "params": [
+            "stockKey"
+          ],
+          "returnType": "void",
+          "exported": true,
+          "lineCount": 6
+        },
+        {
+          "name": "preFill",
+          "params": [
+            "stockKey",
+            "batchSize"
+          ],
+          "returnType": "void",
+          "exported": true,
+          "lineCount": 32
+        },
+        {
+          "name": "returnStock",
+          "params": [
+            "stockKey",
+            "redisTemplate"
+          ],
+          "returnType": "void",
+          "exported": true,
+          "lineCount": 11
+        },
+        {
+          "name": "localRemaining",
+          "params": [
+            "stockKey"
+          ],
+          "returnType": "long",
+          "exported": true,
+          "lineCount": 4
+        },
+        {
+          "name": "returnUnusedStock",
+          "params": [],
+          "returnType": "void",
+          "exported": true,
+          "lineCount": 18
+        },
+        {
+          "name": "clear",
+          "params": [],
+          "returnType": "void",
+          "exported": true,
+          "lineCount": 3
+        },
+        {
+          "name": "localStockCount",
+          "params": [],
+          "returnType": "int",
+          "exported": false,
+          "lineCount": 3
+        }
+      ],
+      "classes": [
+        {
+          "name": "LocalStockCache",
+          "methods": [
+            "LocalStockCache",
+            "acquire",
+            "rollback",
+            "preFill",
+            "returnStock",
+            "localRemaining",
+            "returnUnusedStock",
+            "clear",
+            "localStockCount"
+          ],
+          "properties": [
+            "log",
+            "localStock",
+            "RESTOCK_LOCK_PREFIX",
+            "redisTemplate"
+          ],
+          "exported": true,
+          "lineCount": 189
+        }
+      ],
+      "imports": [
+        {
+          "source": "org.slf4j.Logger",
+          "specifiers": [
+            "Logger"
+          ]
+        },
+        {
+          "source": "org.slf4j.LoggerFactory",
+          "specifiers": [
+            "LoggerFactory"
+          ]
+        },
+        {
+          "source": "org.springframework.data.redis.core.StringRedisTemplate",
+          "specifiers": [
+            "StringRedisTemplate"
+          ]
+        },
+        {
+          "source": "org.springframework.scheduling.annotation.Scheduled",
+          "specifiers": [
+            "Scheduled"
+          ]
+        },
+        {
+          "source": "org.springframework.stereotype.Component",
+          "specifiers": [
+            "Component"
+          ]
+        },
+        {
+          "source": "java.util.concurrent.ConcurrentHashMap",
+          "specifiers": [
+            "ConcurrentHashMap"
+          ]
+        },
+        {
+          "source": "java.util.concurrent.TimeUnit",
+          "specifiers": [
+            "TimeUnit"
+          ]
+        },
+        {
+          "source": "java.util.concurrent.atomic.AtomicLong",
+          "specifiers": [
+            "AtomicLong"
+          ]
+        }
+      ],
+      "exports": [
+        "LocalStockCache",
+        "acquire",
+        "rollback",
+        "preFill",
+        "returnStock",
+        "localRemaining",
+        "returnUnusedStock",
+        "clear",
+        "LocalStockCache"
+      ],
+      "totalLines": 214,
+      "hasStructuralAnalysis": true
+    },
+    "src/main/java/com/luqiang/seckill/common/RedisUtil.java": {
+      "filePath": "src/main/java/com/luqiang/seckill/common/RedisUtil.java",
+      "contentHash": "b420a15f32b509188aef9748f2fb1f65c6c662a26fe1a88dec93451c17d69103",
+      "functions": [
+        {
+          "name": "RedisUtil",
+          "params": [
+            "redisTemplate"
+          ],
+          "exported": true,
+          "lineCount": 3
+        },
+        {
+          "name": "set",
+          "params": [
+            "key",
+            "value"
+          ],
+          "returnType": "void",
+          "exported": true,
+          "lineCount": 3
+        },
+        {
+          "name": "set",
+          "params": [
+            "key",
+            "value",
+            "timeout"
+          ],
+          "returnType": "void",
+          "exported": true,
+          "lineCount": 3
+        },
+        {
+          "name": "get",
+          "params": [
+            "key"
+          ],
+          "returnType": "String",
+          "exported": true,
+          "lineCount": 3
+        },
+        {
+          "name": "setIfAbsent",
+          "params": [
+            "key",
+            "value",
+            "timeoutSeconds"
+          ],
+          "returnType": "Boolean",
+          "exported": true,
+          "lineCount": 3
+        },
+        {
+          "name": "delete",
+          "params": [
+            "key"
+          ],
+          "returnType": "Boolean",
+          "exported": true,
+          "lineCount": 3
+        }
+      ],
+      "classes": [
+        {
+          "name": "RedisUtil",
+          "methods": [
+            "RedisUtil",
+            "set",
+            "set",
+            "get",
+            "setIfAbsent",
+            "delete"
+          ],
+          "properties": [
+            "redisTemplate"
+          ],
+          "exported": true,
+          "lineCount": 29
+        }
+      ],
+      "imports": [
+        {
+          "source": "org.springframework.data.redis.core.StringRedisTemplate",
+          "specifiers": [
+            "StringRedisTemplate"
+          ]
+        },
+        {
+          "source": "org.springframework.stereotype.Component",
+          "specifiers": [
+            "Component"
+          ]
+        },
+        {
+          "source": "java.util.concurrent.TimeUnit",
+          "specifiers": [
+            "TimeUnit"
+          ]
+        }
+      ],
+      "exports": [
+        "RedisUtil",
+        "set",
+        "set",
+        "get",
+        "setIfAbsent",
+        "delete",
+        "RedisUtil"
+      ],
+      "totalLines": 36,
+      "hasStructuralAnalysis": true
+    },
+    "src/main/java/com/luqiang/seckill/common/TokenBucketRateLimiter.java": {
+      "filePath": "src/main/java/com/luqiang/seckill/common/TokenBucketRateLimiter.java",
+      "contentHash": "8abed136f4611747f1ca19fa16e65262652882c3d173d158ded1419c5d1395b4",
+      "functions": [
+        {
+          "name": "TokenBucketRateLimiter",
+          "params": [
+            "ratePerSecond"
+          ],
+          "exported": true,
+          "lineCount": 6
+        },
+        {
+          "name": "tryAcquire",
+          "params": [],
+          "returnType": "boolean",
+          "exported": true,
+          "lineCount": 17
+        }
+      ],
+      "classes": [
+        {
+          "name": "TokenBucketRateLimiter",
+          "methods": [
+            "TokenBucketRateLimiter",
+            "tryAcquire"
+          ],
+          "properties": [
+            "ratePerSecond",
+            "capacity",
+            "tokens",
+            "lastRefillNanos",
+            "lock"
+          ],
+          "exported": true,
+          "lineCount": 36
+        }
+      ],
+      "imports": [
+        {
+          "source": "java.util.concurrent.locks.ReentrantLock",
+          "specifiers": [
+            "ReentrantLock"
+          ]
+        }
+      ],
+      "exports": [
+        "TokenBucketRateLimiter",
+        "tryAcquire",
+        "TokenBucketRateLimiter"
+      ],
+      "totalLines": 45,
+      "hasStructuralAnalysis": true
+    },
+    "src/main/java/com/luqiang/seckill/config/RedisConfig.java": {
+      "filePath": "src/main/java/com/luqiang/seckill/config/RedisConfig.java",
+      "contentHash": "f03872ccc4de6c43cb7898fa167b2122f403ff55663a8f5f66dcdee7c878f639",
+      "functions": [
+        {
+          "name": "lettuceCustomizer",
+          "params": [],
+          "returnType": "LettuceClientConfigurationBuilderCustomizer",
+          "exported": true,
+          "lineCount": 9
+        }
+      ],
+      "classes": [
+        {
+          "name": "RedisConfig",
+          "methods": [
+            "lettuceCustomizer"
+          ],
+          "properties": [],
+          "exported": true,
+          "lineCount": 13
+        }
+      ],
+      "imports": [
+        {
+          "source": "io.lettuce.core.ClientOptions",
+          "specifiers": [
+            "ClientOptions"
+          ]
+        },
+        {
+          "source": "org.springframework.boot.autoconfigure.data.redis.LettuceClientConfigurationBuilderCustomizer",
+          "specifiers": [
+            "LettuceClientConfigurationBuilderCustomizer"
+          ]
+        },
+        {
+          "source": "org.springframework.context.annotation.Bean",
+          "specifiers": [
+            "Bean"
+          ]
+        },
+        {
+          "source": "org.springframework.context.annotation.Configuration",
+          "specifiers": [
+            "Configuration"
+          ]
+        },
+        {
+          "source": "java.time.Duration",
+          "specifiers": [
+            "Duration"
+          ]
+        }
+      ],
+      "exports": [
+        "lettuceCustomizer",
+        "RedisConfig"
+      ],
+      "totalLines": 22,
+      "hasStructuralAnalysis": true
+    },
+    "src/main/java/com/luqiang/seckill/config/WebConfig.java": {
+      "filePath": "src/main/java/com/luqiang/seckill/config/WebConfig.java",
+      "contentHash": "4e85e0011d0addd18ba1afce53631f40b3fff10a16baaa9f711d96356934682d",
+      "functions": [
+        {
+          "name": "addViewControllers",
+          "params": [
+            "registry"
+          ],
+          "returnType": "void",
+          "exported": true,
+          "lineCount": 4
+        },
+        {
+          "name": "addInterceptors",
+          "params": [
+            "registry"
+          ],
+          "returnType": "void",
+          "exported": true,
+          "lineCount": 5
+        }
+      ],
+      "classes": [
+        {
+          "name": "WebConfig",
+          "methods": [
+            "addViewControllers",
+            "addInterceptors"
+          ],
+          "properties": [],
+          "exported": true,
+          "lineCount": 14
+        }
+      ],
+      "imports": [
+        {
+          "source": "com.luqiang.seckill.interceptor.RateLimiterInterceptor",
+          "specifiers": [
+            "RateLimiterInterceptor"
+          ]
+        },
+        {
+          "source": "org.springframework.context.annotation.Configuration",
+          "specifiers": [
+            "Configuration"
+          ]
+        },
+        {
+          "source": "org.springframework.web.servlet.config.annotation.InterceptorRegistry",
+          "specifiers": [
+            "InterceptorRegistry"
+          ]
+        },
+        {
+          "source": "org.springframework.web.servlet.config.annotation.ViewControllerRegistry",
+          "specifiers": [
+            "ViewControllerRegistry"
+          ]
+        },
+        {
+          "source": "org.springframework.web.servlet.config.annotation.WebMvcConfigurer",
+          "specifiers": [
+            "WebMvcConfigurer"
+          ]
+        }
+      ],
+      "exports": [
+        "addViewControllers",
+        "addInterceptors",
+        "WebConfig"
+      ],
+      "totalLines": 23,
+      "hasStructuralAnalysis": true
+    },
+    "src/main/java/com/luqiang/seckill/controller/AuthController.java": {
+      "filePath": "src/main/java/com/luqiang/seckill/controller/AuthController.java",
+      "contentHash": "79cdf7fbdbe9d897a9ca595cf1f11f7d3d86b44f594f8908246ec1c852a12930",
+      "functions": [
+        {
+          "name": "login",
+          "params": [
+            "userId"
+          ],
+          "returnType": "ApiResponse<Map<String, String>>",
+          "exported": true,
+          "lineCount": 5
+        }
+      ],
+      "classes": [
+        {
+          "name": "AuthController",
+          "methods": [
+            "login"
+          ],
+          "properties": [],
+          "exported": true,
+          "lineCount": 10
+        }
+      ],
+      "imports": [
+        {
+          "source": "com.luqiang.seckill.common.ApiResponse",
+          "specifiers": [
+            "ApiResponse"
+          ]
+        },
+        {
+          "source": "com.luqiang.seckill.common.JwtUtil",
+          "specifiers": [
+            "JwtUtil"
+          ]
+        },
+        {
+          "source": "org.springframework.web.bind.annotation",
+          "specifiers": [
+            "*"
+          ]
+        },
+        {
+          "source": "java.util.Map",
+          "specifiers": [
+            "Map"
+          ]
+        }
+      ],
+      "exports": [
+        "login",
+        "AuthController"
+      ],
+      "totalLines": 19,
+      "hasStructuralAnalysis": true
+    },
+    "src/main/java/com/luqiang/seckill/controller/GoodsController.java": {
+      "filePath": "src/main/java/com/luqiang/seckill/controller/GoodsController.java",
+      "contentHash": "8250f07a30a9cd13c65ff17291991aa80452d398bccc940528b3549dbb1b02c0",
+      "functions": [
+        {
+          "name": "GoodsController",
+          "params": [
+            "goodsService"
+          ],
+          "exported": true,
+          "lineCount": 3
+        },
+        {
+          "name": "list",
+          "params": [],
+          "returnType": "ApiResponse<List<Goods>>",
+          "exported": true,
+          "lineCount": 5
+        }
+      ],
+      "classes": [
+        {
+          "name": "GoodsController",
+          "methods": [
+            "GoodsController",
+            "list"
+          ],
+          "properties": [
+            "goodsService"
+          ],
+          "exported": true,
+          "lineCount": 17
+        }
+      ],
+      "imports": [
+        {
+          "source": "com.luqiang.seckill.common.ApiResponse",
+          "specifiers": [
+            "ApiResponse"
+          ]
+        },
+        {
+          "source": "com.luqiang.seckill.entity.Goods",
+          "specifiers": [
+            "Goods"
+          ]
+        },
+        {
+          "source": "com.luqiang.seckill.service.GoodsService",
+          "specifiers": [
+            "GoodsService"
+          ]
+        },
+        {
+          "source": "org.springframework.web.bind.annotation",
+          "specifiers": [
+            "*"
+          ]
+        },
+        {
+          "source": "java.util.List",
+          "specifiers": [
+            "List"
+          ]
+        }
+      ],
+      "exports": [
+        "GoodsController",
+        "list",
+        "GoodsController"
+      ],
+      "totalLines": 26,
+      "hasStructuralAnalysis": true
+    },
+    "src/main/java/com/luqiang/seckill/controller/SeckillController.java": {
+      "filePath": "src/main/java/com/luqiang/seckill/controller/SeckillController.java",
+      "contentHash": "4f0351faec20bf653b0a7c423c7dbd1458e566ae5f8ce89057012aab67a37871",
+      "functions": [
+        {
+          "name": "SeckillController",
+          "params": [
+            "seckillService"
+          ],
+          "exported": true,
+          "lineCount": 3
+        },
+        {
+          "name": "doSeckill",
+          "params": [
+            "id",
+            "userId"
+          ],
+          "returnType": "ApiResponse<Void>",
+          "exported": true,
+          "lineCount": 8
+        },
+        {
+          "name": "getStock",
+          "params": [
+            "id"
+          ],
+          "returnType": "ApiResponse<Integer>",
+          "exported": true,
+          "lineCount": 4
+        },
+        {
+          "name": "getResult",
+          "params": [
+            "id",
+            "userId"
+          ],
+          "returnType": "ApiResponse<OrderInfo>",
+          "exported": true,
+          "lineCount": 8
+        }
+      ],
+      "classes": [
+        {
+          "name": "SeckillController",
+          "methods": [
+            "SeckillController",
+            "doSeckill",
+            "getStock",
+            "getResult"
+          ],
+          "properties": [
+            "seckillService"
+          ],
+          "exported": true,
+          "lineCount": 33
+        }
+      ],
+      "imports": [
+        {
+          "source": "com.luqiang.seckill.common.ApiResponse",
+          "specifiers": [
+            "ApiResponse"
+          ]
+        },
+        {
+          "source": "com.luqiang.seckill.entity.OrderInfo",
+          "specifiers": [
+            "OrderInfo"
+          ]
+        },
+        {
+          "source": "com.luqiang.seckill.service.SeckillService",
+          "specifiers": [
+            "SeckillService"
+          ]
+        },
+        {
+          "source": "org.springframework.web.bind.annotation",
+          "specifiers": [
+            "*"
+          ]
+        }
+      ],
+      "exports": [
+        "SeckillController",
+        "doSeckill",
+        "getStock",
+        "getResult",
+        "SeckillController"
+      ],
+      "totalLines": 40,
+      "hasStructuralAnalysis": true
+    },
+    "src/main/java/com/luqiang/seckill/entity/Goods.java": {
+      "filePath": "src/main/java/com/luqiang/seckill/entity/Goods.java",
+      "contentHash": "c8874e88286f27daee9261b01ee1ec1d568dd9025dce12d1c11330af4dfd3808",
+      "functions": [
+        {
+          "name": "getId",
+          "params": [],
+          "returnType": "Long",
+          "exported": true,
+          "lineCount": 3
+        },
+        {
+          "name": "getName",
+          "params": [],
+          "returnType": "String",
+          "exported": true,
+          "lineCount": 3
+        },
+        {
+          "name": "getPrice",
+          "params": [],
+          "returnType": "BigDecimal",
+          "exported": true,
+          "lineCount": 3
+        },
+        {
+          "name": "getStock",
+          "params": [],
+          "returnType": "Integer",
+          "exported": true,
+          "lineCount": 3
+        },
+        {
+          "name": "setId",
+          "params": [
+            "id"
+          ],
+          "returnType": "void",
+          "exported": true,
+          "lineCount": 3
+        },
+        {
+          "name": "setName",
+          "params": [
+            "name"
+          ],
+          "returnType": "void",
+          "exported": true,
+          "lineCount": 3
+        },
+        {
+          "name": "setPrice",
+          "params": [
+            "price"
+          ],
+          "returnType": "void",
+          "exported": true,
+          "lineCount": 3
+        },
+        {
+          "name": "setStock",
+          "params": [
+            "stock"
+          ],
+          "returnType": "void",
+          "exported": true,
+          "lineCount": 3
+        }
+      ],
+      "classes": [
+        {
+          "name": "Goods",
+          "methods": [
+            "getId",
+            "getName",
+            "getPrice",
+            "getStock",
+            "setId",
+            "setName",
+            "setPrice",
+            "setStock"
+          ],
+          "properties": [
+            "id",
+            "name",
+            "price",
+            "stock"
+          ],
+          "exported": true,
+          "lineCount": 48
+        }
+      ],
+      "imports": [
+        {
+          "source": "jakarta.persistence",
+          "specifiers": [
+            "*"
+          ]
+        },
+        {
+          "source": "java.math.BigDecimal",
+          "specifiers": [
+            "BigDecimal"
+          ]
+        }
+      ],
+      "exports": [
+        "getId",
+        "getName",
+        "getPrice",
+        "getStock",
+        "setId",
+        "setName",
+        "setPrice",
+        "setStock",
+        "Goods"
+      ],
+      "totalLines": 53,
+      "hasStructuralAnalysis": true
+    },
+    "src/main/java/com/luqiang/seckill/entity/OrderInfo.java": {
+      "filePath": "src/main/java/com/luqiang/seckill/entity/OrderInfo.java",
+      "contentHash": "a8e4483a226207a729f1708cf5992290e2382e3cf11f0274bdb26512e218fa4e",
+      "functions": [
+        {
+          "name": "OrderInfo",
+          "params": [],
+          "exported": true,
+          "lineCount": 2
+        },
+        {
+          "name": "OrderInfo",
+          "params": [
+            "goodsId",
+            "userId"
+          ],
+          "exported": true,
+          "lineCount": 6
+        },
+        {
+          "name": "getId",
+          "params": [],
+          "returnType": "Long",
+          "exported": true,
+          "lineCount": 3
+        },
+        {
+          "name": "setId",
+          "params": [
+            "id"
+          ],
+          "returnType": "void",
+          "exported": true,
+          "lineCount": 3
+        },
+        {
+          "name": "getGoodsId",
+          "params": [],
+          "returnType": "Long",
+          "exported": true,
+          "lineCount": 3
+        },
+        {
+          "name": "setGoodsId",
+          "params": [
+            "goodsId"
+          ],
+          "returnType": "void",
+          "exported": true,
+          "lineCount": 3
+        },
+        {
+          "name": "getUserId",
+          "params": [],
+          "returnType": "String",
+          "exported": true,
+          "lineCount": 3
+        },
+        {
+          "name": "setUserId",
+          "params": [
+            "userId"
+          ],
+          "returnType": "void",
+          "exported": true,
+          "lineCount": 3
+        },
+        {
+          "name": "getCreateTime",
+          "params": [],
+          "returnType": "LocalDateTime",
+          "exported": true,
+          "lineCount": 3
+        },
+        {
+          "name": "setCreateTime",
+          "params": [
+            "createTime"
+          ],
+          "returnType": "void",
+          "exported": true,
+          "lineCount": 3
+        },
+        {
+          "name": "getStatus",
+          "params": [],
+          "returnType": "Integer",
+          "exported": true,
+          "lineCount": 3
+        },
+        {
+          "name": "setStatus",
+          "params": [
+            "status"
+          ],
+          "returnType": "void",
+          "exported": true,
+          "lineCount": 3
+        }
+      ],
+      "classes": [
+        {
+          "name": "OrderInfo",
+          "methods": [
+            "OrderInfo",
+            "OrderInfo",
+            "getId",
+            "setId",
+            "getGoodsId",
+            "setGoodsId",
+            "getUserId",
+            "setUserId",
+            "getCreateTime",
+            "setCreateTime",
+            "getStatus",
+            "setStatus"
+          ],
+          "properties": [
+            "id",
+            "goodsId",
+            "userId",
+            "createTime",
+            "STATUS_PENDING",
+            "STATUS_PAID",
+            "STATUS_CANCELLED",
+            "status"
+          ],
+          "exported": true,
+          "lineCount": 74
+        }
+      ],
+      "imports": [
+        {
+          "source": "jakarta.persistence",
+          "specifiers": [
+            "*"
+          ]
+        },
+        {
+          "source": "java.time.LocalDateTime",
+          "specifiers": [
+            "LocalDateTime"
+          ]
+        }
+      ],
+      "exports": [
+        "STATUS_PENDING",
+        "STATUS_PAID",
+        "STATUS_CANCELLED",
+        "OrderInfo",
+        "OrderInfo",
+        "getId",
+        "setId",
+        "getGoodsId",
+        "setGoodsId",
+        "getUserId",
+        "setUserId",
+        "getCreateTime",
+        "setCreateTime",
+        "getStatus",
+        "setStatus",
+        "OrderInfo"
+      ],
+      "totalLines": 80,
+      "hasStructuralAnalysis": true
+    },
+    "src/main/java/com/luqiang/seckill/interceptor/JwtAuthInterceptor.java": {
+      "filePath": "src/main/java/com/luqiang/seckill/interceptor/JwtAuthInterceptor.java",
+      "contentHash": "39064529432d79513cfc17ba380562b3f991dc7205e8d2f823441cbe69a4ee61",
+      "functions": [
+        {
+          "name": "preHandle",
+          "params": [
+            "request",
+            "response",
+            "handler"
+          ],
+          "returnType": "boolean",
+          "exported": true,
+          "lineCount": 29
+        }
+      ],
+      "classes": [
+        {
+          "name": "JwtAuthInterceptor",
+          "methods": [
+            "preHandle"
+          ],
+          "properties": [
+            "objectMapper",
+            "USER_ID_ATTR"
+          ],
+          "exported": true,
+          "lineCount": 35
+        }
+      ],
+      "imports": [
+        {
+          "source": "com.fasterxml.jackson.databind.ObjectMapper",
+          "specifiers": [
+            "ObjectMapper"
+          ]
+        },
+        {
+          "source": "com.luqiang.seckill.common.ApiResponse",
+          "specifiers": [
+            "ApiResponse"
+          ]
+        },
+        {
+          "source": "com.luqiang.seckill.common.JwtUtil",
+          "specifiers": [
+            "JwtUtil"
+          ]
+        },
+        {
+          "source": "jakarta.servlet.http.HttpServletRequest",
+          "specifiers": [
+            "HttpServletRequest"
+          ]
+        },
+        {
+          "source": "jakarta.servlet.http.HttpServletResponse",
+          "specifiers": [
+            "HttpServletResponse"
+          ]
+        },
+        {
+          "source": "org.springframework.http.HttpStatus",
+          "specifiers": [
+            "HttpStatus"
+          ]
+        },
+        {
+          "source": "org.springframework.web.servlet.HandlerInterceptor",
+          "specifiers": [
+            "HandlerInterceptor"
+          ]
+        }
+      ],
+      "exports": [
+        "USER_ID_ATTR",
+        "preHandle",
+        "JwtAuthInterceptor"
+      ],
+      "totalLines": 46,
+      "hasStructuralAnalysis": true
+    },
+    "src/main/java/com/luqiang/seckill/interceptor/RateLimiterInterceptor.java": {
+      "filePath": "src/main/java/com/luqiang/seckill/interceptor/RateLimiterInterceptor.java",
+      "contentHash": "b1de3a6d8260e6ca075a15ac7b67f56aa736065b895cb069621d2fbeadfe9eb9",
+      "functions": [
+        {
+          "name": "preHandle",
+          "params": [
+            "request",
+            "response",
+            "handler"
+          ],
+          "returnType": "boolean",
+          "exported": true,
+          "lineCount": 14
+        },
+        {
+          "name": "writeBody",
+          "params": [
+            "response",
+            "body"
+          ],
+          "returnType": "void",
+          "exported": false,
+          "lineCount": 3
+        }
+      ],
+      "classes": [
+        {
+          "name": "RateLimiterInterceptor",
+          "methods": [
+            "preHandle",
+            "writeBody"
+          ],
+          "properties": [
+            "rateLimiter",
+            "objectMapper"
+          ],
+          "exported": true,
+          "lineCount": 24
+        }
+      ],
+      "imports": [
+        {
+          "source": "com.fasterxml.jackson.databind.ObjectMapper",
+          "specifiers": [
+            "ObjectMapper"
+          ]
+        },
+        {
+          "source": "com.luqiang.seckill.common.ApiResponse",
+          "specifiers": [
+            "ApiResponse"
+          ]
+        },
+        {
+          "source": "com.luqiang.seckill.common.TokenBucketRateLimiter",
+          "specifiers": [
+            "TokenBucketRateLimiter"
+          ]
+        },
+        {
+          "source": "jakarta.servlet.http.HttpServletRequest",
+          "specifiers": [
+            "HttpServletRequest"
+          ]
+        },
+        {
+          "source": "jakarta.servlet.http.HttpServletResponse",
+          "specifiers": [
+            "HttpServletResponse"
+          ]
+        },
+        {
+          "source": "org.springframework.http.HttpStatus",
+          "specifiers": [
+            "HttpStatus"
+          ]
+        },
+        {
+          "source": "org.springframework.web.servlet.HandlerInterceptor",
+          "specifiers": [
+            "HandlerInterceptor"
+          ]
+        },
+        {
+          "source": "java.io.IOException",
+          "specifiers": [
+            "IOException"
+          ]
+        }
+      ],
+      "exports": [
+        "preHandle",
+        "RateLimiterInterceptor"
+      ],
+      "totalLines": 37,
+      "hasStructuralAnalysis": true
+    },
+    "src/main/java/com/luqiang/seckill/mapper/GoodsMapper.java": {
+      "filePath": "src/main/java/com/luqiang/seckill/mapper/GoodsMapper.java",
+      "contentHash": "cce68558e46bd209f2d9fdafaa7010272eecb742bea4017661a45da9f51f982f",
+      "functions": [],
+      "classes": [
+        {
+          "name": "GoodsMapper",
+          "methods": [
+            "findAll"
+          ],
+          "properties": [],
+          "exported": true,
+          "lineCount": 6
+        }
+      ],
+      "imports": [
+        {
+          "source": "com.luqiang.seckill.entity.Goods",
+          "specifiers": [
+            "Goods"
+          ]
+        },
+        {
+          "source": "org.apache.ibatis.annotations.Mapper",
+          "specifiers": [
+            "Mapper"
+          ]
+        },
+        {
+          "source": "org.apache.ibatis.annotations.Select",
+          "specifiers": [
+            "Select"
+          ]
+        },
+        {
+          "source": "java.util.List",
+          "specifiers": [
+            "List"
+          ]
+        }
+      ],
+      "exports": [
+        "GoodsMapper"
+      ],
+      "totalLines": 14,
+      "hasStructuralAnalysis": true
+    },
+    "src/main/java/com/luqiang/seckill/repository/GoodsRepository.java": {
+      "filePath": "src/main/java/com/luqiang/seckill/repository/GoodsRepository.java",
+      "contentHash": "0552de5cf99dba6cd4765dd23834c7663de52c50c541ff957d07c0e8cbf5435e",
+      "functions": [],
+      "classes": [
+        {
+          "name": "GoodsRepository",
+          "methods": [],
+          "properties": [],
+          "exported": true,
+          "lineCount": 2
+        }
+      ],
+      "imports": [
+        {
+          "source": "com.luqiang.seckill.entity.Goods",
+          "specifiers": [
+            "Goods"
+          ]
+        },
+        {
+          "source": "org.springframework.data.jpa.repository.JpaRepository",
+          "specifiers": [
+            "JpaRepository"
+          ]
+        }
+      ],
+      "exports": [
+        "GoodsRepository"
+      ],
+      "totalLines": 7,
+      "hasStructuralAnalysis": true
+    },
+    "src/main/java/com/luqiang/seckill/repository/OrderInfoRepository.java": {
+      "filePath": "src/main/java/com/luqiang/seckill/repository/OrderInfoRepository.java",
+      "contentHash": "cd28c1950d8b50d243a14b94bcfc3cf5facce50fad10e21ce37a8ff1cc560ca8",
+      "functions": [],
+      "classes": [
+        {
+          "name": "OrderInfoRepository",
+          "methods": [
+            "findByGoodsIdAndUserId"
+          ],
+          "properties": [],
+          "exported": true,
+          "lineCount": 3
+        }
+      ],
+      "imports": [
+        {
+          "source": "com.luqiang.seckill.entity.OrderInfo",
+          "specifiers": [
+            "OrderInfo"
+          ]
+        },
+        {
+          "source": "org.springframework.data.jpa.repository.JpaRepository",
+          "specifiers": [
+            "JpaRepository"
+          ]
+        },
+        {
+          "source": "java.util.Optional",
+          "specifiers": [
+            "Optional"
+          ]
+        }
+      ],
+      "exports": [
+        "OrderInfoRepository"
+      ],
+      "totalLines": 11,
+      "hasStructuralAnalysis": true
+    },
+    "src/main/java/com/luqiang/seckill/scheduler/OrderCancelScheduler.java": {
+      "filePath": "src/main/java/com/luqiang/seckill/scheduler/OrderCancelScheduler.java",
+      "contentHash": "b01d4e4e37f90ce3cc30f634bee757c34e9d4180553d467aee4892365d3953fe",
+      "functions": [
+        {
+          "name": "OrderCancelScheduler",
+          "params": [
+            "redisTemplate",
+            "jdbcTemplate"
+          ],
+          "exported": true,
+          "lineCount": 4
+        },
+        {
+          "name": "cancelExpiredOrders",
+          "params": [],
+          "returnType": "void",
+          "exported": true,
+          "lineCount": 17
+        },
+        {
+          "name": "processCancellation",
+          "params": [
+            "member"
+          ],
+          "returnType": "void",
+          "exported": false,
+          "lineCount": 49
+        }
+      ],
+      "classes": [
+        {
+          "name": "OrderCancelScheduler",
+          "methods": [
+            "OrderCancelScheduler",
+            "cancelExpiredOrders",
+            "processCancellation"
+          ],
+          "properties": [
+            "log",
+            "BATCH_SIZE",
+            "redisTemplate",
+            "jdbcTemplate"
+          ],
+          "exported": true,
+          "lineCount": 82
+        }
+      ],
+      "imports": [
+        {
+          "source": "com.luqiang.seckill.common.CacheConstants",
+          "specifiers": [
+            "CacheConstants"
+          ]
+        },
+        {
+          "source": "org.slf4j.Logger",
+          "specifiers": [
+            "Logger"
+          ]
+        },
+        {
+          "source": "org.slf4j.LoggerFactory",
+          "specifiers": [
+            "LoggerFactory"
+          ]
+        },
+        {
+          "source": "org.springframework.data.redis.core.StringRedisTemplate",
+          "specifiers": [
+            "StringRedisTemplate"
+          ]
+        },
+        {
+          "source": "org.springframework.jdbc.core.JdbcTemplate",
+          "specifiers": [
+            "JdbcTemplate"
+          ]
+        },
+        {
+          "source": "org.springframework.scheduling.annotation.Scheduled",
+          "specifiers": [
+            "Scheduled"
+          ]
+        },
+        {
+          "source": "org.springframework.stereotype.Component",
+          "specifiers": [
+            "Component"
+          ]
+        },
+        {
+          "source": "java.util.Set",
+          "specifiers": [
+            "Set"
+          ]
+        }
+      ],
+      "exports": [
+        "OrderCancelScheduler",
+        "cancelExpiredOrders",
+        "OrderCancelScheduler"
+      ],
+      "totalLines": 95,
+      "hasStructuralAnalysis": true
+    },
+    "src/main/java/com/luqiang/seckill/scheduler/OrderPersistScheduler.java": {
+      "filePath": "src/main/java/com/luqiang/seckill/scheduler/OrderPersistScheduler.java",
+      "contentHash": "0a0c7d76800c05084234117eb1f9611e7c0aaea99b5451743e45defd8c5c103a",
+      "functions": [
+        {
+          "name": "OrderPersistScheduler",
+          "params": [
+            "queueService",
+            "jdbcTemplate"
+          ],
+          "exported": true,
+          "lineCount": 4
+        },
+        {
+          "name": "consumeQueue",
+          "params": [],
+          "returnType": "void",
+          "exported": true,
+          "lineCount": 29
+        }
+      ],
+      "classes": [
+        {
+          "name": "OrderPersistScheduler",
+          "methods": [
+            "OrderPersistScheduler",
+            "consumeQueue"
+          ],
+          "properties": [
+            "log",
+            "BATCH_SIZE",
+            "queueService",
+            "jdbcTemplate"
+          ],
+          "exported": true,
+          "lineCount": 44
+        }
+      ],
+      "imports": [
+        {
+          "source": "com.luqiang.seckill.service.OrderQueueService",
+          "specifiers": [
+            "OrderQueueService"
+          ]
+        },
+        {
+          "source": "org.slf4j.Logger",
+          "specifiers": [
+            "Logger"
+          ]
+        },
+        {
+          "source": "org.slf4j.LoggerFactory",
+          "specifiers": [
+            "LoggerFactory"
+          ]
+        },
+        {
+          "source": "org.springframework.jdbc.core.JdbcTemplate",
+          "specifiers": [
+            "JdbcTemplate"
+          ]
+        },
+        {
+          "source": "org.springframework.scheduling.annotation.Scheduled",
+          "specifiers": [
+            "Scheduled"
+          ]
+        },
+        {
+          "source": "org.springframework.stereotype.Component",
+          "specifiers": [
+            "Component"
+          ]
+        },
+        {
+          "source": "java.sql.Timestamp",
+          "specifiers": [
+            "Timestamp"
+          ]
+        },
+        {
+          "source": "java.time.LocalDateTime",
+          "specifiers": [
+            "LocalDateTime"
+          ]
+        },
+        {
+          "source": "java.util.List",
+          "specifiers": [
+            "List"
+          ]
+        }
+      ],
+      "exports": [
+        "OrderPersistScheduler",
+        "consumeQueue",
+        "OrderPersistScheduler"
+      ],
+      "totalLines": 57,
+      "hasStructuralAnalysis": true
+    },
+    "src/main/java/com/luqiang/seckill/SeckillSystemApplication.java": {
+      "filePath": "src/main/java/com/luqiang/seckill/SeckillSystemApplication.java",
+      "contentHash": "001e4f5885230cdc050b224817d77022f204accf11c7127fccbc99fc127b3ea9",
+      "functions": [
+        {
+          "name": "SeckillSystemApplication",
+          "params": [
+            "goodsMapper"
+          ],
+          "exported": true,
+          "lineCount": 3
+        },
+        {
+          "name": "main",
+          "params": [
+            "args"
+          ],
+          "returnType": "void",
+          "exported": true,
+          "lineCount": 3
+        },
+        {
+          "name": "checkDatabase",
+          "params": [
+            "dataSource"
+          ],
+          "returnType": "CommandLineRunner",
+          "exported": true,
+          "lineCount": 14
+        },
+        {
+          "name": "initStock",
+          "params": [
+            "redisTemplate",
+            "localStockCache",
+            "bloomFilter"
+          ],
+          "returnType": "CommandLineRunner",
+          "exported": true,
+          "lineCount": 38
+        }
+      ],
+      "classes": [
+        {
+          "name": "SeckillSystemApplication",
+          "methods": [
+            "SeckillSystemApplication",
+            "main",
+            "checkDatabase",
+            "initStock"
+          ],
+          "properties": [
+            "log",
+            "goodsMapper",
+            "PRE_FILL_BATCH"
+          ],
+          "exported": true,
+          "lineCount": 72
+        }
+      ],
+      "imports": [
+        {
+          "source": "com.luqiang.seckill.common.BloomFilter",
+          "specifiers": [
+            "BloomFilter"
+          ]
+        },
+        {
+          "source": "com.luqiang.seckill.common.CacheConstants",
+          "specifiers": [
+            "CacheConstants"
+          ]
+        },
+        {
+          "source": "com.luqiang.seckill.common.LocalStockCache",
+          "specifiers": [
+            "LocalStockCache"
+          ]
+        },
+        {
+          "source": "com.luqiang.seckill.entity.Goods",
+          "specifiers": [
+            "Goods"
+          ]
+        },
+        {
+          "source": "com.luqiang.seckill.mapper.GoodsMapper",
+          "specifiers": [
+            "GoodsMapper"
+          ]
+        },
+        {
+          "source": "org.mybatis.spring.annotation.MapperScan",
+          "specifiers": [
+            "MapperScan"
+          ]
+        },
+        {
+          "source": "org.slf4j.Logger",
+          "specifiers": [
+            "Logger"
+          ]
+        },
+        {
+          "source": "org.slf4j.LoggerFactory",
+          "specifiers": [
+            "LoggerFactory"
+          ]
+        },
+        {
+          "source": "org.springframework.boot.CommandLineRunner",
+          "specifiers": [
+            "CommandLineRunner"
+          ]
+        },
+        {
+          "source": "org.springframework.boot.SpringApplication",
+          "specifiers": [
+            "SpringApplication"
+          ]
+        },
+        {
+          "source": "org.springframework.boot.autoconfigure.SpringBootApplication",
+          "specifiers": [
+            "SpringBootApplication"
+          ]
+        },
+        {
+          "source": "org.springframework.context.annotation.Bean",
+          "specifiers": [
+            "Bean"
+          ]
+        },
+        {
+          "source": "org.springframework.scheduling.annotation.EnableScheduling",
+          "specifiers": [
+            "EnableScheduling"
+          ]
+        },
+        {
+          "source": "org.springframework.data.redis.core.StringRedisTemplate",
+          "specifiers": [
+            "StringRedisTemplate"
+          ]
+        },
+        {
+          "source": "javax.sql.DataSource",
+          "specifiers": [
+            "DataSource"
+          ]
+        },
+        {
+          "source": "java.sql.Connection",
+          "specifiers": [
+            "Connection"
+          ]
+        },
+        {
+          "source": "java.util.List",
+          "specifiers": [
+            "List"
+          ]
+        }
+      ],
+      "exports": [
+        "SeckillSystemApplication",
+        "main",
+        "checkDatabase",
+        "initStock",
+        "SeckillSystemApplication"
+      ],
+      "totalLines": 93,
+      "hasStructuralAnalysis": true
+    },
+    "src/main/java/com/luqiang/seckill/service/GoodsService.java": {
+      "filePath": "src/main/java/com/luqiang/seckill/service/GoodsService.java",
+      "contentHash": "d3d38ed5f94a25dedcb2bd643e9bccdbc660651a6f5d26e440ab7f68e5c28818",
+      "functions": [],
+      "classes": [
+        {
+          "name": "GoodsService",
+          "methods": [
+            "listGoods"
+          ],
+          "properties": [],
+          "exported": true,
+          "lineCount": 3
+        }
+      ],
+      "imports": [
+        {
+          "source": "com.luqiang.seckill.entity.Goods",
+          "specifiers": [
+            "Goods"
+          ]
+        },
+        {
+          "source": "java.util.List",
+          "specifiers": [
+            "List"
+          ]
+        }
+      ],
+      "exports": [
+        "GoodsService"
+      ],
+      "totalLines": 8,
+      "hasStructuralAnalysis": true
+    },
+    "src/main/java/com/luqiang/seckill/service/impl/GoodsServiceImpl.java": {
+      "filePath": "src/main/java/com/luqiang/seckill/service/impl/GoodsServiceImpl.java",
+      "contentHash": "168580cc848f527c42156e9910032a06f18764145b1bdceca68f0585b85e9525",
+      "functions": [
+        {
+          "name": "GoodsServiceImpl",
+          "params": [
+            "redisUtil",
+            "goodsRepository",
+            "objectMapper"
+          ],
+          "exported": true,
+          "lineCount": 7
+        },
+        {
+          "name": "listGoods",
+          "params": [],
+          "returnType": "List<Goods>",
+          "exported": true,
+          "lineCount": 67
+        }
+      ],
+      "classes": [
+        {
+          "name": "GoodsServiceImpl",
+          "methods": [
+            "GoodsServiceImpl",
+            "listGoods"
+          ],
+          "properties": [
+            "log",
+            "redisUtil",
+            "goodsRepository",
+            "objectMapper"
+          ],
+          "exported": true,
+          "lineCount": 84
+        }
+      ],
+      "imports": [
+        {
+          "source": "com.fasterxml.jackson.databind.ObjectMapper",
+          "specifiers": [
+            "ObjectMapper"
+          ]
+        },
+        {
+          "source": "com.luqiang.seckill.common.CacheConstants",
+          "specifiers": [
+            "CacheConstants"
+          ]
+        },
+        {
+          "source": "com.luqiang.seckill.common.RedisUtil",
+          "specifiers": [
+            "RedisUtil"
+          ]
+        },
+        {
+          "source": "com.luqiang.seckill.entity.Goods",
+          "specifiers": [
+            "Goods"
+          ]
+        },
+        {
+          "source": "com.luqiang.seckill.repository.GoodsRepository",
+          "specifiers": [
+            "GoodsRepository"
+          ]
+        },
+        {
+          "source": "com.luqiang.seckill.service.GoodsService",
+          "specifiers": [
+            "GoodsService"
+          ]
+        },
+        {
+          "source": "org.slf4j.Logger",
+          "specifiers": [
+            "Logger"
+          ]
+        },
+        {
+          "source": "org.slf4j.LoggerFactory",
+          "specifiers": [
+            "LoggerFactory"
+          ]
+        },
+        {
+          "source": "org.springframework.stereotype.Service",
+          "specifiers": [
+            "Service"
+          ]
+        },
+        {
+          "source": "java.util.Collections",
+          "specifiers": [
+            "Collections"
+          ]
+        },
+        {
+          "source": "java.util.Arrays",
+          "specifiers": [
+            "Arrays"
+          ]
+        },
+        {
+          "source": "java.util.List",
+          "specifiers": [
+            "List"
+          ]
+        },
+        {
+          "source": "java.util.concurrent.ThreadLocalRandom",
+          "specifiers": [
+            "ThreadLocalRandom"
+          ]
+        }
+      ],
+      "exports": [
+        "GoodsServiceImpl",
+        "listGoods",
+        "GoodsServiceImpl"
+      ],
+      "totalLines": 101,
+      "hasStructuralAnalysis": true
+    },
+    "src/main/java/com/luqiang/seckill/service/impl/SeckillServiceImpl.java": {
+      "filePath": "src/main/java/com/luqiang/seckill/service/impl/SeckillServiceImpl.java",
+      "contentHash": "676b8ba53060f093bf77719cfa7e231fcc3ae2e226ef353ef756b7357c634d19",
+      "functions": [
+        {
+          "name": "SeckillServiceImpl",
+          "params": [
+            "redisTemplate",
+            "orderInfoRepository",
+            "goodsRepository",
+            "localStockCache",
+            "bloomFilter"
+          ],
+          "exported": true,
+          "lineCount": 11
+        },
+        {
+          "name": "executeSeckill",
+          "params": [
+            "goodsId",
+            "userId"
+          ],
+          "returnType": "ApiResponse<Void>",
+          "exported": true,
+          "lineCount": 82
+        },
+        {
+          "name": "getStock",
+          "params": [
+            "goodsId"
+          ],
+          "returnType": "ApiResponse<Integer>",
+          "exported": true,
+          "lineCount": 24
+        },
+        {
+          "name": "getResult",
+          "params": [
+            "goodsId",
+            "userId"
+          ],
+          "returnType": "ApiResponse<OrderInfo>",
+          "exported": true,
+          "lineCount": 18
+        },
+        {
+          "name": "warmupStock",
+          "params": [
+            "goodsId"
+          ],
+          "returnType": "boolean",
+          "exported": false,
+          "lineCount": 20
+        }
+      ],
+      "classes": [
+        {
+          "name": "SeckillServiceImpl",
+          "methods": [
+            "SeckillServiceImpl",
+            "executeSeckill",
+            "getStock",
+            "getResult",
+            "warmupStock"
+          ],
+          "properties": [
+            "log",
+            "BATCH_SIZE",
+            "redisTemplate",
+            "orderInfoRepository",
+            "goodsRepository",
+            "localStockCache",
+            "bloomFilter",
+            "warmedUpGoods"
+          ],
+          "exported": true,
+          "lineCount": 178
+        }
+      ],
+      "imports": [
+        {
+          "source": "com.luqiang.seckill.common.ApiResponse",
+          "specifiers": [
+            "ApiResponse"
+          ]
+        },
+        {
+          "source": "com.luqiang.seckill.common.BloomFilter",
+          "specifiers": [
+            "BloomFilter"
+          ]
+        },
+        {
+          "source": "com.luqiang.seckill.common.CacheConstants",
+          "specifiers": [
+            "CacheConstants"
+          ]
+        },
+        {
+          "source": "com.luqiang.seckill.common.LocalStockCache",
+          "specifiers": [
+            "LocalStockCache"
+          ]
+        },
+        {
+          "source": "com.luqiang.seckill.entity.Goods",
+          "specifiers": [
+            "Goods"
+          ]
+        },
+        {
+          "source": "com.luqiang.seckill.entity.OrderInfo",
+          "specifiers": [
+            "OrderInfo"
+          ]
+        },
+        {
+          "source": "com.luqiang.seckill.repository.GoodsRepository",
+          "specifiers": [
+            "GoodsRepository"
+          ]
+        },
+        {
+          "source": "com.luqiang.seckill.repository.OrderInfoRepository",
+          "specifiers": [
+            "OrderInfoRepository"
+          ]
+        },
+        {
+          "source": "com.luqiang.seckill.service.SeckillService",
+          "specifiers": [
+            "SeckillService"
+          ]
+        },
+        {
+          "source": "org.slf4j.Logger",
+          "specifiers": [
+            "Logger"
+          ]
+        },
+        {
+          "source": "org.slf4j.LoggerFactory",
+          "specifiers": [
+            "LoggerFactory"
+          ]
+        },
+        {
+          "source": "org.springframework.data.redis.core.RedisOperations",
+          "specifiers": [
+            "RedisOperations"
+          ]
+        },
+        {
+          "source": "org.springframework.data.redis.core.SessionCallback",
+          "specifiers": [
+            "SessionCallback"
+          ]
+        },
+        {
+          "source": "org.springframework.data.redis.core.StringRedisTemplate",
+          "specifiers": [
+            "StringRedisTemplate"
+          ]
+        },
+        {
+          "source": "org.springframework.stereotype.Service",
+          "specifiers": [
+            "Service"
+          ]
+        },
+        {
+          "source": "java.util.List",
+          "specifiers": [
+            "List"
+          ]
+        },
+        {
+          "source": "java.util.Optional",
+          "specifiers": [
+            "Optional"
+          ]
+        },
+        {
+          "source": "java.util.Set",
+          "specifiers": [
+            "Set"
+          ]
+        },
+        {
+          "source": "java.util.concurrent.ConcurrentHashMap",
+          "specifiers": [
+            "ConcurrentHashMap"
+          ]
+        },
+        {
+          "source": "java.util.concurrent.TimeUnit",
+          "specifiers": [
+            "TimeUnit"
+          ]
+        }
+      ],
+      "exports": [
+        "SeckillServiceImpl",
+        "executeSeckill",
+        "getStock",
+        "getResult",
+        "SeckillServiceImpl"
+      ],
+      "totalLines": 203,
+      "hasStructuralAnalysis": true
+    },
+    "src/main/java/com/luqiang/seckill/service/OrderQueueService.java": {
+      "filePath": "src/main/java/com/luqiang/seckill/service/OrderQueueService.java",
+      "contentHash": "81718ce13c84621b42d0d392d51ac87d3e99857a6dc68f769c66968cbb90fea8",
+      "functions": [
+        {
+          "name": "OrderQueueService",
+          "params": [
+            "redisTemplate"
+          ],
+          "exported": true,
+          "lineCount": 3
+        },
+        {
+          "name": "enqueue",
+          "params": [
+            "goodsId",
+            "userId"
+          ],
+          "returnType": "boolean",
+          "exported": true,
+          "lineCount": 10
+        },
+        {
+          "name": "dequeueBatch",
+          "params": [
+            "batchSize"
+          ],
+          "returnType": "List<String>",
+          "exported": true,
+          "lineCount": 9
+        },
+        {
+          "name": "enqueueRaw",
+          "params": [
+            "raw"
+          ],
+          "returnType": "void",
+          "exported": true,
+          "lineCount": 4
+        },
+        {
+          "name": "queueSize",
+          "params": [],
+          "returnType": "long",
+          "exported": true,
+          "lineCount": 4
+        }
+      ],
+      "classes": [
+        {
+          "name": "OrderQueueService",
+          "methods": [
+            "OrderQueueService",
+            "enqueue",
+            "dequeueBatch",
+            "enqueueRaw",
+            "queueSize"
+          ],
+          "properties": [
+            "log",
+            "ORDER_QUEUE_KEY",
+            "DEQUEUE_SCRIPT",
+            "redisTemplate"
+          ],
+          "exported": true,
+          "lineCount": 58
+        }
+      ],
+      "imports": [
+        {
+          "source": "org.slf4j.Logger",
+          "specifiers": [
+            "Logger"
+          ]
+        },
+        {
+          "source": "org.slf4j.LoggerFactory",
+          "specifiers": [
+            "LoggerFactory"
+          ]
+        },
+        {
+          "source": "org.springframework.data.redis.core.StringRedisTemplate",
+          "specifiers": [
+            "StringRedisTemplate"
+          ]
+        },
+        {
+          "source": "org.springframework.data.redis.core.script.DefaultRedisScript",
+          "specifiers": [
+            "DefaultRedisScript"
+          ]
+        },
+        {
+          "source": "org.springframework.stereotype.Service",
+          "specifiers": [
+            "Service"
+          ]
+        },
+        {
+          "source": "java.util.Collections",
+          "specifiers": [
+            "Collections"
+          ]
+        },
+        {
+          "source": "java.util.List",
+          "specifiers": [
+            "List"
+          ]
+        }
+      ],
+      "exports": [
+        "OrderQueueService",
+        "enqueue",
+        "dequeueBatch",
+        "enqueueRaw",
+        "queueSize",
+        "OrderQueueService"
+      ],
+      "totalLines": 70,
+      "hasStructuralAnalysis": true
+    },
+    "src/main/java/com/luqiang/seckill/service/SeckillService.java": {
+      "filePath": "src/main/java/com/luqiang/seckill/service/SeckillService.java",
+      "contentHash": "2ff04e2a025e17159242ce5e50d97b239780b0575f315cc5050c45ff5e5b071b",
+      "functions": [],
+      "classes": [
+        {
+          "name": "SeckillService",
+          "methods": [
+            "executeSeckill",
+            "getStock",
+            "getResult"
+          ],
+          "properties": [],
+          "exported": true,
+          "lineCount": 7
+        }
+      ],
+      "imports": [
+        {
+          "source": "com.luqiang.seckill.common.ApiResponse",
+          "specifiers": [
+            "ApiResponse"
+          ]
+        },
+        {
+          "source": "com.luqiang.seckill.entity.OrderInfo",
+          "specifiers": [
+            "OrderInfo"
+          ]
+        }
+      ],
+      "exports": [
+        "SeckillService"
+      ],
+      "totalLines": 12,
+      "hasStructuralAnalysis": true
+    },
+    "src/main/resources/application-docker.yml": {
+      "filePath": "src/main/resources/application-docker.yml",
+      "contentHash": "71d8bec16607b3258d3d3eac99e30ed29e05b55ab8fb1fe132c189698538a282",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 33,
+      "hasStructuralAnalysis": true
+    },
+    "src/main/resources/application.yml": {
+      "filePath": "src/main/resources/application.yml",
+      "contentHash": "7c69350a3e9df17adaf15d876da6911dc331175d49f15f751d07529e75aabafb",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 55,
+      "hasStructuralAnalysis": true
+    },
+    "src/main/resources/data.sql": {
+      "filePath": "src/main/resources/data.sql",
+      "contentHash": "ce52fcbc77d159f371e9078717b46ebafb12e14ce51647def70c14a0a6413b88",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 3,
+      "hasStructuralAnalysis": true
+    },
+    "src/main/resources/schema.sql": {
+      "filePath": "src/main/resources/schema.sql",
+      "contentHash": "cb9a817edcfc3e521b92586ca46e30584b64af227a849d956cf7bc4c79ecbcac",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 16,
+      "hasStructuralAnalysis": true
+    },
+    "src/main/resources/static/dashboard.html": {
+      "filePath": "src/main/resources/static/dashboard.html",
+      "contentHash": "dd4d9c8a4dea7aeb9881e2c21db4a606ae2055637d4941b204d434ec1fe431ae",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 262,
+      "hasStructuralAnalysis": false
+    },
+    "src/main/resources/static/seckill.html": {
+      "filePath": "src/main/resources/static/seckill.html",
+      "contentHash": "26714c2e33af8c5a3d4cb84188678f980fc4df6cfc82aac4c0abb849206b1cad",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 325,
+      "hasStructuralAnalysis": false
+    },
+    "src/test/java/com/luqiang/seckill/SeckillSystemApplicationTests.java": {
+      "filePath": "src/test/java/com/luqiang/seckill/SeckillSystemApplicationTests.java",
+      "contentHash": "464f14abb0f767837f78b854665732f3d7bb96b4496e45e1160225e4ae3b2e37",
+      "functions": [
+        {
+          "name": "contextLoads",
+          "params": [],
+          "returnType": "void",
+          "exported": false,
+          "lineCount": 3
+        }
+      ],
+      "classes": [
+        {
+          "name": "SeckillSystemApplicationTests",
+          "methods": [
+            "contextLoads"
+          ],
+          "properties": [],
+          "exported": false,
+          "lineCount": 8
+        }
+      ],
+      "imports": [
+        {
+          "source": "org.junit.jupiter.api.Test",
+          "specifiers": [
+            "Test"
+          ]
+        },
+        {
+          "source": "org.springframework.boot.test.context.SpringBootTest",
+          "specifiers": [
+            "SpringBootTest"
+          ]
+        }
+      ],
+      "exports": [],
+      "totalLines": 14,
+      "hasStructuralAnalysis": true
+    },
+    "src/test/java/SeckillSystemApplication.java": {
+      "filePath": "src/test/java/SeckillSystemApplication.java",
+      "contentHash": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 1,
+      "hasStructuralAnalysis": true
+    }
+  }
+}
