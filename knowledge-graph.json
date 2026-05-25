@@ -1,0 +1,3745 @@
+{
+  "version": "1.0.0",
+  "project": {
+    "name": "seckill-system",
+    "languages": [
+      "batch",
+      "conf",
+      "dockerfile",
+      "html",
+      "java",
+      "jmx",
+      "markdown",
+      "properties",
+      "shell",
+      "sql",
+      "xml",
+      "yaml"
+    ],
+    "frameworks": [
+      "Docker",
+      "Docker Compose",
+      "JUnit",
+      "JWT",
+      "MyBatis",
+      "Spring Boot",
+      "Spring Data JPA",
+      "Spring Data Redis"
+    ],
+    "description": "Seckill System Project -- a high-concurrency flash-sale system built with Spring Boot, Redis Sentinel, and MySQL. It achieves ~370 QPS stable throughput through inventory segmentation with CAS local stock cache, Redis Pipeline batch operations, a peak-shaving queue with 4-thread parallel JDBC batch persistence, and Bloom filter cache protection.",
+    "analyzedAt": "2026-05-25T03:18:56.856639Z",
+    "gitCommitHash": "90984d54e40abe21be5b8b1e54443097d3946524"
+  },
+  "nodes": [
+    {
+      "id": "file:src/main/java/com/luqiang/seckill/SeckillSystemApplication.java",
+      "type": "file",
+      "name": "SeckillSystemApplication.java",
+      "filePath": "src/main/java/com/luqiang/seckill/SeckillSystemApplication.java",
+      "summary": "Spring Boot application entry point with CommandLineRunner beans for database connectivity check and Redis stock initialization with segmented inventory.",
+      "tags": [
+        "entry-point",
+        "spring-boot",
+        "initialization",
+        "tested"
+      ],
+      "complexity": "moderate"
+    },
+    {
+      "id": "file:src/main/java/com/luqiang/seckill/common/BloomFilter.java",
+      "type": "file",
+      "name": "BloomFilter.java",
+      "filePath": "src/main/java/com/luqiang/seckill/common/BloomFilter.java",
+      "summary": "Redis Bitmap-based bloom filter implementation for goodsId existence checks, preventing cache penetration attacks.",
+      "tags": [
+        "utility",
+        "cache",
+        "bloom-filter",
+        "redis"
+      ],
+      "complexity": "moderate"
+    },
+    {
+      "id": "file:src/main/java/com/luqiang/seckill/common/CacheConstants.java",
+      "type": "file",
+      "name": "CacheConstants.java",
+      "filePath": "src/main/java/com/luqiang/seckill/common/CacheConstants.java",
+      "summary": "Centralized Redis key templates and cache TTL constants with hash-tag segmented routing for stock, order, and soldout keys.",
+      "tags": [
+        "configuration",
+        "constants",
+        "redis",
+        "caching"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "file:src/main/java/com/luqiang/seckill/common/LocalStockCache.java",
+      "type": "file",
+      "name": "LocalStockCache.java",
+      "filePath": "src/main/java/com/luqiang/seckill/common/LocalStockCache.java",
+      "summary": "CAS-based local JVM stock cache that batches inventory from Redis segments, reducing network round trips through lock-free local deduction.",
+      "tags": [
+        "concurrency",
+        "cache",
+        "stock",
+        "performance",
+        "redis"
+      ],
+      "complexity": "complex",
+      "languageNotes": "Uses ConcurrentHashMap plus AtomicLong with CAS compareAndSet for lock-free local stock operations."
+    },
+    {
+      "id": "file:src/main/java/com/luqiang/seckill/mapper/GoodsMapper.java",
+      "type": "file",
+      "name": "GoodsMapper.java",
+      "filePath": "src/main/java/com/luqiang/seckill/mapper/GoodsMapper.java",
+      "summary": "MyBatis mapper interface exposing a findAll query to retrieve all goods from the database.",
+      "tags": [
+        "database",
+        "mybatis",
+        "mapper"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "file:src/main/java/com/luqiang/seckill/repository/OrderInfoRepository.java",
+      "type": "file",
+      "name": "OrderInfoRepository.java",
+      "filePath": "src/main/java/com/luqiang/seckill/repository/OrderInfoRepository.java",
+      "summary": "Spring Data JPA repository for OrderInfo entity with findByGoodsIdAndUserId query method.",
+      "tags": [
+        "database",
+        "jpa",
+        "repository"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "file:src/main/java/com/luqiang/seckill/scheduler/OrderCancelScheduler.java",
+      "type": "file",
+      "name": "OrderCancelScheduler.java",
+      "filePath": "src/main/java/com/luqiang/seckill/scheduler/OrderCancelScheduler.java",
+      "summary": "Scheduled component that polls a Redis ZSET for expired pending orders and cancels them via JDBC update with Redis state restoration.",
+      "tags": [
+        "scheduler",
+        "order-cancellation",
+        "redis",
+        "jdbc"
+      ],
+      "complexity": "moderate"
+    },
+    {
+      "id": "file:src/main/java/com/luqiang/seckill/service/impl/SeckillServiceImpl.java",
+      "type": "file",
+      "name": "SeckillServiceImpl.java",
+      "filePath": "src/main/java/com/luqiang/seckill/service/impl/SeckillServiceImpl.java",
+      "summary": "Core seckill service implementing multi-phase inventory deduction: bloom filter validation, local stock CAS acquisition, Redis pipelined SADD/LPUSH/EXPIRE batch operations, and delayed cancellation via ZSET.",
+      "tags": [
+        "service",
+        "seckill",
+        "concurrency",
+        "redis",
+        "pipeline"
+      ],
+      "complexity": "complex",
+      "languageNotes": "Implements SeckillService with a 4-phase flow: bloom filter guard, soldout fast-path, local CAS stock with auto-restock, and Redis Pipeline executing 4 commands in 1 RTT."
+    },
+    {
+      "id": "class:src/main/java/com/luqiang/seckill/SeckillSystemApplication.java:SeckillSystemApplication",
+      "type": "class",
+      "name": "SeckillSystemApplication",
+      "filePath": "src/main/java/com/luqiang/seckill/SeckillSystemApplication.java",
+      "lineRange": [
+        22,
+        93
+      ],
+      "summary": "Spring Boot main application class with @MapperScan, @EnableScheduling, and two CommandLineRunner beans for DB health check and Redis stock initialization.",
+      "tags": [
+        "entry-point",
+        "spring-boot",
+        "configuration"
+      ],
+      "complexity": "moderate"
+    },
+    {
+      "id": "class:src/main/java/com/luqiang/seckill/common/BloomFilter.java:BloomFilter",
+      "type": "class",
+      "name": "BloomFilter",
+      "filePath": "src/main/java/com/luqiang/seckill/common/BloomFilter.java",
+      "lineRange": [
+        13,
+        74
+      ],
+      "summary": "Redis Bitmap-based bloom filter with K=7 hash functions and 1M-bit bitmap, providing O(K) membership checks for cache penetration protection.",
+      "tags": [
+        "data-structure",
+        "cache",
+        "bloom-filter",
+        "redis"
+      ],
+      "complexity": "moderate"
+    },
+    {
+      "id": "class:src/main/java/com/luqiang/seckill/common/CacheConstants.java:CacheConstants",
+      "type": "class",
+      "name": "CacheConstants",
+      "filePath": "src/main/java/com/luqiang/seckill/common/CacheConstants.java",
+      "lineRange": [
+        3,
+        43
+      ],
+      "summary": "Utility class with static Redis key format methods and cache TTL constants for segmented stock, order deduplication, soldout markers, and delayed cancellation.",
+      "tags": [
+        "constants",
+        "configuration",
+        "redis"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "class:src/main/java/com/luqiang/seckill/common/LocalStockCache.java:LocalStockCache",
+      "type": "class",
+      "name": "LocalStockCache",
+      "filePath": "src/main/java/com/luqiang/seckill/common/LocalStockCache.java",
+      "lineRange": [
+        25,
+        213
+      ],
+      "summary": "Thread-safe local stock cache using ConcurrentHashMap of AtomicLong for CAS-based batch inventory deduction with Redis distributed restock lock.",
+      "tags": [
+        "concurrency",
+        "cache",
+        "stock",
+        "performance"
+      ],
+      "complexity": "complex"
+    },
+    {
+      "id": "class:src/main/java/com/luqiang/seckill/mapper/GoodsMapper.java:GoodsMapper",
+      "type": "class",
+      "name": "GoodsMapper",
+      "filePath": "src/main/java/com/luqiang/seckill/mapper/GoodsMapper.java",
+      "lineRange": [
+        9,
+        14
+      ],
+      "summary": "MyBatis mapper interface with a single findAll query selecting all goods from the database.",
+      "tags": [
+        "database",
+        "mybatis",
+        "mapper"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "class:src/main/java/com/luqiang/seckill/repository/OrderInfoRepository.java:OrderInfoRepository",
+      "type": "class",
+      "name": "OrderInfoRepository",
+      "filePath": "src/main/java/com/luqiang/seckill/repository/OrderInfoRepository.java",
+      "lineRange": [
+        8,
+        10
+      ],
+      "summary": "Spring Data JPA repository extending JpaRepository for OrderInfo CRUD with findByGoodsIdAndUserId lookup.",
+      "tags": [
+        "database",
+        "jpa",
+        "repository"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "class:src/main/java/com/luqiang/seckill/scheduler/OrderCancelScheduler.java:OrderCancelScheduler",
+      "type": "class",
+      "name": "OrderCancelScheduler",
+      "filePath": "src/main/java/com/luqiang/seckill/scheduler/OrderCancelScheduler.java",
+      "lineRange": [
+        13,
+        94
+      ],
+      "summary": "Spring scheduled component that polls Redis ZSET for delayed order cancellation at 3-second intervals, processing up to 20 cancellations per cycle.",
+      "tags": [
+        "scheduler",
+        "order-cancellation",
+        "redis"
+      ],
+      "complexity": "moderate"
+    },
+    {
+      "id": "class:src/main/java/com/luqiang/seckill/service/impl/SeckillServiceImpl.java:SeckillServiceImpl",
+      "type": "class",
+      "name": "SeckillServiceImpl",
+      "filePath": "src/main/java/com/luqiang/seckill/service/impl/SeckillServiceImpl.java",
+      "lineRange": [
+        25,
+        202
+      ],
+      "summary": "SeckillService implementation with bloom filter guard, soldout fast-path, segmented local CAS stock deduction, Redis Pipeline batch operations, and delayed cancellation ZSET enrollment.",
+      "tags": [
+        "service",
+        "seckill",
+        "concurrency",
+        "redis"
+      ],
+      "complexity": "complex"
+    },
+    {
+      "id": "function:src/main/java/com/luqiang/seckill/SeckillSystemApplication.java:checkDatabase",
+      "type": "function",
+      "name": "checkDatabase",
+      "filePath": "src/main/java/com/luqiang/seckill/SeckillSystemApplication.java",
+      "lineRange": [
+        38,
+        51
+      ],
+      "summary": "CommandLineRunner bean that verifies MySQL connectivity on startup and logs connection URL and username.",
+      "tags": [
+        "initialization",
+        "database",
+        "health-check"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:src/main/java/com/luqiang/seckill/SeckillSystemApplication.java:initStock",
+      "type": "function",
+      "name": "initStock",
+      "filePath": "src/main/java/com/luqiang/seckill/SeckillSystemApplication.java",
+      "lineRange": [
+        55,
+        92
+      ],
+      "summary": "CommandLineRunner bean that initializes segmented Redis stock from database goods and pre-fills local stock cache.",
+      "tags": [
+        "initialization",
+        "redis",
+        "stock",
+        "cache-warmup"
+      ],
+      "complexity": "moderate"
+    },
+    {
+      "id": "function:src/main/java/com/luqiang/seckill/common/BloomFilter.java:add",
+      "type": "function",
+      "name": "add",
+      "filePath": "src/main/java/com/luqiang/seckill/common/BloomFilter.java",
+      "lineRange": [
+        29,
+        34
+      ],
+      "summary": "Inserts a goodsId into the Redis Bitmap bloom filter by computing K hash positions and setting each bit.",
+      "tags": [
+        "bloom-filter",
+        "redis",
+        "bitmap"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:src/main/java/com/luqiang/seckill/common/BloomFilter.java:mightContain",
+      "type": "function",
+      "name": "mightContain",
+      "filePath": "src/main/java/com/luqiang/seckill/common/BloomFilter.java",
+      "lineRange": [
+        40,
+        49
+      ],
+      "summary": "Checks whether a goodsId may exist in the bloom filter via K bitmap reads; returns false for guaranteed absence.",
+      "tags": [
+        "bloom-filter",
+        "redis",
+        "cache-protection"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:src/main/java/com/luqiang/seckill/common/BloomFilter.java:initAll",
+      "type": "function",
+      "name": "initAll",
+      "filePath": "src/main/java/com/luqiang/seckill/common/BloomFilter.java",
+      "lineRange": [
+        52,
+        62
+      ],
+      "summary": "Batch-initializes the bloom filter bitmap with all existing goodsIds, skipping if the bitmap already has data.",
+      "tags": [
+        "bloom-filter",
+        "redis",
+        "initialization"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:src/main/java/com/luqiang/seckill/common/LocalStockCache.java:acquire",
+      "type": "function",
+      "name": "acquire",
+      "filePath": "src/main/java/com/luqiang/seckill/common/LocalStockCache.java",
+      "lineRange": [
+        49,
+        110
+      ],
+      "summary": "CAS-based local stock deduction with automatic Redis batch restock under a distributed lock when local inventory is exhausted.",
+      "tags": [
+        "concurrency",
+        "cache",
+        "stock",
+        "cas"
+      ],
+      "complexity": "complex"
+    },
+    {
+      "id": "function:src/main/java/com/luqiang/seckill/common/LocalStockCache.java:preFill",
+      "type": "function",
+      "name": "preFill",
+      "filePath": "src/main/java/com/luqiang/seckill/common/LocalStockCache.java",
+      "lineRange": [
+        125,
+        156
+      ],
+      "summary": "Pre-fills local stock cache from Redis during warmup to avoid cold-start lock contention among concurrent requests.",
+      "tags": [
+        "cache",
+        "warmup",
+        "concurrency"
+      ],
+      "complexity": "moderate"
+    },
+    {
+      "id": "function:src/main/java/com/luqiang/seckill/common/LocalStockCache.java:returnStock",
+      "type": "function",
+      "name": "returnStock",
+      "filePath": "src/main/java/com/luqiang/seckill/common/LocalStockCache.java",
+      "lineRange": [
+        161,
+        171
+      ],
+      "summary": "Atomically returns remaining local stock for a specific key back to Redis and resets local counter to zero.",
+      "tags": [
+        "cache",
+        "redis",
+        "cleanup"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:src/main/java/com/luqiang/seckill/common/LocalStockCache.java:returnUnusedStock",
+      "type": "function",
+      "name": "returnUnusedStock",
+      "filePath": "src/main/java/com/luqiang/seckill/common/LocalStockCache.java",
+      "lineRange": [
+        184,
+        201
+      ],
+      "summary": "Scheduled task at 5-second intervals that returns excess local stock (over 100 units per segment) back to Redis.",
+      "tags": [
+        "scheduler",
+        "cache",
+        "redis",
+        "cleanup"
+      ],
+      "complexity": "moderate"
+    },
+    {
+      "id": "function:src/main/java/com/luqiang/seckill/scheduler/OrderCancelScheduler.java:cancelExpiredOrders",
+      "type": "function",
+      "name": "cancelExpiredOrders",
+      "filePath": "src/main/java/com/luqiang/seckill/scheduler/OrderCancelScheduler.java",
+      "lineRange": [
+        27,
+        43
+      ],
+      "summary": "Scheduled method polling the Redis delayed-cancel ZSET for expired orders, processing up to 20 per 3-second cycle.",
+      "tags": [
+        "scheduler",
+        "order-cancellation",
+        "redis"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:src/main/java/com/luqiang/seckill/scheduler/OrderCancelScheduler.java:processCancellation",
+      "type": "function",
+      "name": "processCancellation",
+      "filePath": "src/main/java/com/luqiang/seckill/scheduler/OrderCancelScheduler.java",
+      "lineRange": [
+        45,
+        93
+      ],
+      "summary": "Processes a single order cancellation by parsing the ZSET member, claiming via ZREM, updating DB status to cancelled, and restoring Redis stock with deduplication cleanup.",
+      "tags": [
+        "order-cancellation",
+        "redis",
+        "jdbc",
+        "compensation"
+      ],
+      "complexity": "moderate"
+    },
+    {
+      "id": "function:src/main/java/com/luqiang/seckill/service/impl/SeckillServiceImpl.java:executeSeckill",
+      "type": "function",
+      "name": "executeSeckill",
+      "filePath": "src/main/java/com/luqiang/seckill/service/impl/SeckillServiceImpl.java",
+      "lineRange": [
+        54,
+        135
+      ],
+      "summary": "Main seckill flow: validates via bloom filter and soldout guard, iterates segments for local CAS stock deduction, Redis Pipeline SADD/LPUSH/EXPIRE batch operations, and enrolls in delayed cancellation ZSET.",
+      "tags": [
+        "seckill",
+        "concurrency",
+        "redis-pipeline",
+        "service"
+      ],
+      "complexity": "complex"
+    },
+    {
+      "id": "function:src/main/java/com/luqiang/seckill/service/impl/SeckillServiceImpl.java:getStock",
+      "type": "function",
+      "name": "getStock",
+      "filePath": "src/main/java/com/luqiang/seckill/service/impl/SeckillServiceImpl.java",
+      "lineRange": [
+        137,
+        160
+      ],
+      "summary": "Queries remaining stock across all Redis segments plus local cache, falling back to database if no Redis data exists.",
+      "tags": [
+        "query",
+        "stock",
+        "redis",
+        "api"
+      ],
+      "complexity": "moderate"
+    },
+    {
+      "id": "function:src/main/java/com/luqiang/seckill/service/impl/SeckillServiceImpl.java:getResult",
+      "type": "function",
+      "name": "getResult",
+      "filePath": "src/main/java/com/luqiang/seckill/service/impl/SeckillServiceImpl.java",
+      "lineRange": [
+        162,
+        179
+      ],
+      "summary": "Queries order status by goodsId and userId, checking both the database record and Redis deduplication sets for in-progress orders.",
+      "tags": [
+        "query",
+        "order",
+        "redis",
+        "api"
+      ],
+      "complexity": "moderate"
+    },
+    {
+      "id": "function:src/main/java/com/luqiang/seckill/service/impl/SeckillServiceImpl.java:warmupStock",
+      "type": "function",
+      "name": "warmupStock",
+      "filePath": "src/main/java/com/luqiang/seckill/service/impl/SeckillServiceImpl.java",
+      "lineRange": [
+        181,
+        200
+      ],
+      "summary": "Lazy-loads segmented stock from database to Redis for a goodsId on first request, resets soldout flag, and registers in bloom filter.",
+      "tags": [
+        "cache-warmup",
+        "redis",
+        "stock",
+        "lazy-loading"
+      ],
+      "complexity": "moderate"
+    },
+    {
+      "id": "file:src/main/java/com/luqiang/seckill/common/ApiResponse.java",
+      "type": "file",
+      "name": "ApiResponse.java",
+      "filePath": "src/main/java/com/luqiang/seckill/common/ApiResponse.java",
+      "summary": "Standardized API response envelope using a Java record with static factory methods for success and failure results, used across all controllers and interceptors.",
+      "tags": [
+        "api-response",
+        "data-model",
+        "serialization"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "file:src/main/java/com/luqiang/seckill/common/JwtUtil.java",
+      "type": "file",
+      "name": "JwtUtil.java",
+      "filePath": "src/main/java/com/luqiang/seckill/common/JwtUtil.java",
+      "summary": "JWT utility class providing HMAC-SHA256 token generation and validation for authenticating users via Bearer tokens across the seckill system.",
+      "tags": [
+        "utility",
+        "authentication",
+        "security",
+        "token"
+      ],
+      "complexity": "moderate"
+    },
+    {
+      "id": "file:src/main/java/com/luqiang/seckill/controller/AuthController.java",
+      "type": "file",
+      "name": "AuthController.java",
+      "filePath": "src/main/java/com/luqiang/seckill/controller/AuthController.java",
+      "summary": "REST controller exposing a POST /auth/login endpoint that generates and returns a JWT token for a given user ID.",
+      "tags": [
+        "api-handler",
+        "authentication",
+        "controller"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "file:src/main/java/com/luqiang/seckill/controller/SeckillController.java",
+      "type": "file",
+      "name": "SeckillController.java",
+      "filePath": "src/main/java/com/luqiang/seckill/controller/SeckillController.java",
+      "summary": "REST controller with endpoints for executing flash-sale orders, querying stock levels, and polling order results via SeckillService.",
+      "tags": [
+        "api-handler",
+        "controller",
+        "seckill"
+      ],
+      "complexity": "moderate"
+    },
+    {
+      "id": "file:src/main/java/com/luqiang/seckill/entity/OrderInfo.java",
+      "type": "file",
+      "name": "OrderInfo.java",
+      "filePath": "src/main/java/com/luqiang/seckill/entity/OrderInfo.java",
+      "summary": "JPA entity mapping to the seckill_order table with order status lifecycle constants (pending, paid, cancelled) and audit timestamps.",
+      "tags": [
+        "data-model",
+        "entity",
+        "jpa",
+        "database"
+      ],
+      "complexity": "moderate"
+    },
+    {
+      "id": "file:src/main/java/com/luqiang/seckill/interceptor/JwtAuthInterceptor.java",
+      "type": "file",
+      "name": "JwtAuthInterceptor.java",
+      "filePath": "src/main/java/com/luqiang/seckill/interceptor/JwtAuthInterceptor.java",
+      "summary": "Spring HandlerInterceptor that extracts and validates Bearer JWT tokens from incoming requests, setting the userId attribute or returning 401 on failure.",
+      "tags": [
+        "middleware",
+        "authentication",
+        "security",
+        "interceptor"
+      ],
+      "complexity": "moderate"
+    },
+    {
+      "id": "file:src/main/java/com/luqiang/seckill/service/SeckillService.java",
+      "type": "file",
+      "name": "SeckillService.java",
+      "filePath": "src/main/java/com/luqiang/seckill/service/SeckillService.java",
+      "summary": "Service interface defining the seckill contract with abstract methods for order execution, stock querying, and result retrieval.",
+      "tags": [
+        "service",
+        "interface",
+        "seckill"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "class:src/main/java/com/luqiang/seckill/common/ApiResponse.java:ApiResponse",
+      "type": "class",
+      "name": "ApiResponse",
+      "filePath": "src/main/java/com/luqiang/seckill/common/ApiResponse.java",
+      "lineRange": [
+        3,
+        12
+      ],
+      "summary": "Generic Java record serving as a standardized API response wrapper with a code, message, and data payload.",
+      "tags": [
+        "api-response",
+        "data-model",
+        "generic"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "class:src/main/java/com/luqiang/seckill/common/JwtUtil.java:JwtUtil",
+      "type": "class",
+      "name": "JwtUtil",
+      "filePath": "src/main/java/com/luqiang/seckill/common/JwtUtil.java",
+      "lineRange": [
+        12,
+        46
+      ],
+      "summary": "Utility class encapsulating HMAC-SHA256 JWT signing key and expiration logic for token generation and parsing.",
+      "tags": [
+        "utility",
+        "authentication",
+        "security"
+      ],
+      "complexity": "moderate",
+      "languageNotes": "Uses JJWT library with HMAC-SHA256 signing via Keys.hmacShaKeyFor."
+    },
+    {
+      "id": "function:src/main/java/com/luqiang/seckill/common/JwtUtil.java:generate",
+      "type": "function",
+      "name": "generate",
+      "filePath": "src/main/java/com/luqiang/seckill/common/JwtUtil.java",
+      "lineRange": [
+        19,
+        27
+      ],
+      "summary": "Generates a signed JWT token for the given userId with a 30-minute expiration window.",
+      "tags": [
+        "authentication",
+        "token",
+        "utility"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:src/main/java/com/luqiang/seckill/common/JwtUtil.java:parseUserId",
+      "type": "function",
+      "name": "parseUserId",
+      "filePath": "src/main/java/com/luqiang/seckill/common/JwtUtil.java",
+      "lineRange": [
+        30,
+        45
+      ],
+      "summary": "Parses and validates a JWT token, returning the embedded userId or null if the token is expired, tampered, or malformed.",
+      "tags": [
+        "authentication",
+        "token",
+        "validation"
+      ],
+      "complexity": "moderate"
+    },
+    {
+      "id": "class:src/main/java/com/luqiang/seckill/controller/AuthController.java:AuthController",
+      "type": "class",
+      "name": "AuthController",
+      "filePath": "src/main/java/com/luqiang/seckill/controller/AuthController.java",
+      "lineRange": [
+        9,
+        18
+      ],
+      "summary": "Spring REST controller handling user login requests with JWT token issuance.",
+      "tags": [
+        "controller",
+        "authentication",
+        "api-handler"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:src/main/java/com/luqiang/seckill/controller/AuthController.java:login",
+      "type": "function",
+      "name": "login",
+      "filePath": "src/main/java/com/luqiang/seckill/controller/AuthController.java",
+      "lineRange": [
+        13,
+        17
+      ],
+      "summary": "Handles POST /auth/login by generating a JWT token and returning it in a success response envelope.",
+      "tags": [
+        "api-handler",
+        "login",
+        "authentication"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "class:src/main/java/com/luqiang/seckill/controller/SeckillController.java:SeckillController",
+      "type": "class",
+      "name": "SeckillController",
+      "filePath": "src/main/java/com/luqiang/seckill/controller/SeckillController.java",
+      "lineRange": [
+        8,
+        40
+      ],
+      "summary": "Spring REST controller exposing flash-sale operations with input validation, delegating business logic to SeckillService.",
+      "tags": [
+        "controller",
+        "seckill",
+        "api-handler"
+      ],
+      "complexity": "moderate"
+    },
+    {
+      "id": "function:src/main/java/com/luqiang/seckill/controller/SeckillController.java:doSeckill",
+      "type": "function",
+      "name": "doSeckill",
+      "filePath": "src/main/java/com/luqiang/seckill/controller/SeckillController.java",
+      "lineRange": [
+        18,
+        25
+      ],
+      "summary": "Handles POST /seckill/do/{id} to execute a flash-sale order after validating the userId parameter is present.",
+      "tags": [
+        "api-handler",
+        "seckill",
+        "order"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:src/main/java/com/luqiang/seckill/controller/SeckillController.java:getStock",
+      "type": "function",
+      "name": "getStock",
+      "filePath": "src/main/java/com/luqiang/seckill/controller/SeckillController.java",
+      "lineRange": [
+        27,
+        30
+      ],
+      "summary": "Handles GET /seckill/stock/{id} to retrieve the remaining stock quantity for a given goods ID.",
+      "tags": [
+        "api-handler",
+        "stock",
+        "query"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:src/main/java/com/luqiang/seckill/controller/SeckillController.java:getResult",
+      "type": "function",
+      "name": "getResult",
+      "filePath": "src/main/java/com/luqiang/seckill/controller/SeckillController.java",
+      "lineRange": [
+        32,
+        39
+      ],
+      "summary": "Handles GET /seckill/result/{id} to poll the order result by goods ID and userId after a seckill attempt.",
+      "tags": [
+        "api-handler",
+        "seckill",
+        "result",
+        "polling"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "class:src/main/java/com/luqiang/seckill/entity/OrderInfo.java:OrderInfo",
+      "type": "class",
+      "name": "OrderInfo",
+      "filePath": "src/main/java/com/luqiang/seckill/entity/OrderInfo.java",
+      "lineRange": [
+        6,
+        79
+      ],
+      "summary": "JPA entity for the seckill_order table with fields for goodsId, userId, createTime, and a tri-state status (pending, paid, cancelled).",
+      "tags": [
+        "entity",
+        "jpa",
+        "data-model",
+        "order"
+      ],
+      "complexity": "moderate",
+      "languageNotes": "Uses Jakarta Persistence annotations with auto-generated identity and snake_case column mappings."
+    },
+    {
+      "id": "class:src/main/java/com/luqiang/seckill/interceptor/JwtAuthInterceptor.java:JwtAuthInterceptor",
+      "type": "class",
+      "name": "JwtAuthInterceptor",
+      "filePath": "src/main/java/com/luqiang/seckill/interceptor/JwtAuthInterceptor.java",
+      "lineRange": [
+        11,
+        45
+      ],
+      "summary": "Spring HandlerInterceptor implementation that enforces JWT authentication by validating Bearer tokens on all incoming requests.",
+      "tags": [
+        "middleware",
+        "authentication",
+        "interceptor",
+        "security"
+      ],
+      "complexity": "moderate"
+    },
+    {
+      "id": "function:src/main/java/com/luqiang/seckill/interceptor/JwtAuthInterceptor.java:preHandle",
+      "type": "function",
+      "name": "preHandle",
+      "filePath": "src/main/java/com/luqiang/seckill/interceptor/JwtAuthInterceptor.java",
+      "lineRange": [
+        16,
+        44
+      ],
+      "summary": "Intercepts HTTP requests to extract and validate the JWT from the Authorization header, setting the userId request attribute or returning 401 with a JSON error body.",
+      "tags": [
+        "middleware",
+        "authentication",
+        "validation"
+      ],
+      "complexity": "moderate",
+      "languageNotes": "Implements Spring HandlerInterceptor with manual JSON serialization via Jackson ObjectMapper."
+    },
+    {
+      "id": "class:src/main/java/com/luqiang/seckill/service/SeckillService.java:SeckillService",
+      "type": "class",
+      "name": "SeckillService",
+      "filePath": "src/main/java/com/luqiang/seckill/service/SeckillService.java",
+      "lineRange": [
+        6,
+        12
+      ],
+      "summary": "Service interface defining the seckill business contract with methods for executing orders, checking stock, and retrieving order results.",
+      "tags": [
+        "service",
+        "interface",
+        "seckill"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "file:src/main/java/com/luqiang/seckill/common/RedisUtil.java",
+      "type": "file",
+      "name": "RedisUtil.java",
+      "filePath": "src/main/java/com/luqiang/seckill/common/RedisUtil.java",
+      "summary": "Spring-managed Redis utility bean wrapping StringRedisTemplate with common key-value operations (set, get, setIfAbsent, delete) used across the service layer.",
+      "tags": [
+        "utility",
+        "redis",
+        "cache"
+      ],
+      "complexity": "simple",
+      "languageNotes": "Wraps StringRedisTemplate in a Spring @Component for constructor injection into service beans."
+    },
+    {
+      "id": "class:src/main/java/com/luqiang/seckill/common/RedisUtil.java:RedisUtil",
+      "type": "class",
+      "name": "RedisUtil",
+      "filePath": "src/main/java/com/luqiang/seckill/common/RedisUtil.java",
+      "lineRange": [
+        8,
+        36
+      ],
+      "summary": "Provides Redis key-value operations (set, get, setIfAbsent, delete) delegating to StringRedisTemplate with configurable TTL support.",
+      "tags": [
+        "utility",
+        "redis",
+        "cache-component"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "file:src/main/java/com/luqiang/seckill/controller/GoodsController.java",
+      "type": "file",
+      "name": "GoodsController.java",
+      "filePath": "src/main/java/com/luqiang/seckill/controller/GoodsController.java",
+      "summary": "REST controller exposing the /goods/list endpoint that returns the cached goods list wrapped in a standardized ApiResponse.",
+      "tags": [
+        "controller",
+        "api-handler",
+        "goods",
+        "rest"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "class:src/main/java/com/luqiang/seckill/controller/GoodsController.java:GoodsController",
+      "type": "class",
+      "name": "GoodsController",
+      "filePath": "src/main/java/com/luqiang/seckill/controller/GoodsController.java",
+      "lineRange": [
+        10,
+        26
+      ],
+      "summary": "Spring @RestController handling /goods/* endpoints with constructor-injected GoodsService dependency.",
+      "tags": [
+        "controller",
+        "api-handler",
+        "rest"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "file:src/main/java/com/luqiang/seckill/entity/Goods.java",
+      "type": "file",
+      "name": "Goods.java",
+      "filePath": "src/main/java/com/luqiang/seckill/entity/Goods.java",
+      "summary": "JPA entity mapping the goods table with id, name, price, and stock fields for flash-sale goods.",
+      "tags": [
+        "entity",
+        "data-model",
+        "jpa"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "class:src/main/java/com/luqiang/seckill/entity/Goods.java:Goods",
+      "type": "class",
+      "name": "Goods",
+      "filePath": "src/main/java/com/luqiang/seckill/entity/Goods.java",
+      "lineRange": [
+        6,
+        53
+      ],
+      "summary": "JPA @Entity mapped to the goods table with auto-generated id, name, price, and stock fields with standard getters and setters.",
+      "tags": [
+        "entity",
+        "data-model",
+        "jpa"
+      ],
+      "complexity": "simple",
+      "languageNotes": "Uses Jakarta Persistence API (jakarta.persistence) with @GeneratedValue IDENTITY strategy for MySQL auto-increment."
+    },
+    {
+      "id": "file:src/main/java/com/luqiang/seckill/repository/GoodsRepository.java",
+      "type": "file",
+      "name": "GoodsRepository.java",
+      "filePath": "src/main/java/com/luqiang/seckill/repository/GoodsRepository.java",
+      "summary": "Spring Data JPA repository interface extending JpaRepository to provide CRUD operations for the Goods entity.",
+      "tags": [
+        "repository",
+        "data-access",
+        "jpa"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "class:src/main/java/com/luqiang/seckill/repository/GoodsRepository.java:GoodsRepository",
+      "type": "class",
+      "name": "GoodsRepository",
+      "filePath": "src/main/java/com/luqiang/seckill/repository/GoodsRepository.java",
+      "lineRange": [
+        6,
+        7
+      ],
+      "summary": "Spring Data JPA repository interface providing CRUD operations for Goods entities via JpaRepository inheritance.",
+      "tags": [
+        "repository",
+        "data-access",
+        "jpa"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "file:src/main/java/com/luqiang/seckill/service/GoodsService.java",
+      "type": "file",
+      "name": "GoodsService.java",
+      "filePath": "src/main/java/com/luqiang/seckill/service/GoodsService.java",
+      "summary": "Service interface defining the contract for goods listing operations consumed by the REST controller.",
+      "tags": [
+        "service",
+        "interface",
+        "contract"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "class:src/main/java/com/luqiang/seckill/service/GoodsService.java:GoodsService",
+      "type": "class",
+      "name": "GoodsService",
+      "filePath": "src/main/java/com/luqiang/seckill/service/GoodsService.java",
+      "lineRange": [
+        6,
+        8
+      ],
+      "summary": "Service interface declaring listGoods() contract for retrieving the goods list.",
+      "tags": [
+        "service",
+        "interface",
+        "contract"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "file:src/main/java/com/luqiang/seckill/service/impl/GoodsServiceImpl.java",
+      "type": "file",
+      "name": "GoodsServiceImpl.java",
+      "filePath": "src/main/java/com/luqiang/seckill/service/impl/GoodsServiceImpl.java",
+      "summary": "Implementation of GoodsService using a cache-aside pattern with Redis distributed locking to prevent cache stampede on the goods listing, with database fallback.",
+      "tags": [
+        "service",
+        "implementation",
+        "cache-aside",
+        "redis",
+        "distributed-lock"
+      ],
+      "complexity": "moderate",
+      "languageNotes": "Implements cache-aside pattern with Redis SETNX distributed lock and randomized TTL to prevent cache stampede under high concurrency."
+    },
+    {
+      "id": "class:src/main/java/com/luqiang/seckill/service/impl/GoodsServiceImpl.java:GoodsServiceImpl",
+      "type": "class",
+      "name": "GoodsServiceImpl",
+      "filePath": "src/main/java/com/luqiang/seckill/service/impl/GoodsServiceImpl.java",
+      "lineRange": [
+        18,
+        101
+      ],
+      "summary": "Spring @Service implementing GoodsService with Redis-backed cache-aside, distributed lock for stampede protection, and DB fallback.",
+      "tags": [
+        "service",
+        "cache-aside",
+        "redis",
+        "distributed-lock"
+      ],
+      "complexity": "moderate"
+    },
+    {
+      "id": "function:src/main/java/com/luqiang/seckill/service/impl/GoodsServiceImpl.java:listGoods",
+      "type": "function",
+      "name": "listGoods",
+      "filePath": "src/main/java/com/luqiang/seckill/service/impl/GoodsServiceImpl.java",
+      "lineRange": [
+        34,
+        100
+      ],
+      "summary": "Retrieves the goods list with a multi-layer caching strategy: reads from Redis cache, acquires a distributed lock on cache miss to prevent stampede, loads from database, and writes cache with randomized TTL, with a retry and fallback path on lock contention.",
+      "tags": [
+        "cache-aside",
+        "distributed-lock",
+        "cache-stampede"
+      ],
+      "complexity": "moderate"
+    },
+    {
+      "id": "file:src/main/java/com/luqiang/seckill/common/TokenBucketRateLimiter.java",
+      "type": "file",
+      "name": "TokenBucketRateLimiter.java",
+      "filePath": "src/main/java/com/luqiang/seckill/common/TokenBucketRateLimiter.java",
+      "summary": "Thread-safe token bucket rate limiter using ReentrantLock and nanosecond timing, providing tryAcquire() for per-request rate limiting with automatic token refill.",
+      "tags": [
+        "rate-limiter",
+        "utility",
+        "concurrency"
+      ],
+      "complexity": "simple",
+      "languageNotes": "Uses ReentrantLock for thread safety and System.nanoTime() for precise token refill calculations."
+    },
+    {
+      "id": "file:src/main/java/com/luqiang/seckill/config/WebConfig.java",
+      "type": "file",
+      "name": "WebConfig.java",
+      "filePath": "src/main/java/com/luqiang/seckill/config/WebConfig.java",
+      "summary": "Spring MVC configuration that registers the rate limiter interceptor on /seckill/** paths and redirects the root URL to the seckill HTML page.",
+      "tags": [
+        "configuration",
+        "spring-mvc",
+        "interceptor"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "file:src/main/java/com/luqiang/seckill/interceptor/RateLimiterInterceptor.java",
+      "type": "file",
+      "name": "RateLimiterInterceptor.java",
+      "filePath": "src/main/java/com/luqiang/seckill/interceptor/RateLimiterInterceptor.java",
+      "summary": "Spring HandlerInterceptor that enforces rate limiting via TokenBucketRateLimiter (5000 req/s), returning HTTP 429 with a JSON error body when throttled.",
+      "tags": [
+        "interceptor",
+        "rate-limiter",
+        "api-handler"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "class:src/main/java/com/luqiang/seckill/common/TokenBucketRateLimiter.java:TokenBucketRateLimiter",
+      "type": "class",
+      "name": "TokenBucketRateLimiter",
+      "filePath": "src/main/java/com/luqiang/seckill/common/TokenBucketRateLimiter.java",
+      "lineRange": [
+        9,
+        44
+      ],
+      "summary": "Thread-safe token bucket implementation with configurable rate, using ReentrantLock for concurrent access and nanosecond-precision refill timing.",
+      "tags": [
+        "rate-limiter",
+        "concurrency",
+        "utility"
+      ],
+      "complexity": "simple",
+      "languageNotes": "Capacity equals one second of tokens, allowing burst up to the configured rate."
+    },
+    {
+      "id": "function:src/main/java/com/luqiang/seckill/common/TokenBucketRateLimiter.java:tryAcquire",
+      "type": "function",
+      "name": "tryAcquire",
+      "filePath": "src/main/java/com/luqiang/seckill/common/TokenBucketRateLimiter.java",
+      "lineRange": [
+        27,
+        43
+      ],
+      "summary": "Attempts to consume one token from the bucket, refilling tokens based on elapsed time since the last call. Returns true if allowed, false if rate-limited.",
+      "tags": [
+        "rate-limiter",
+        "concurrency"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "class:src/main/java/com/luqiang/seckill/config/WebConfig.java:WebConfig",
+      "type": "class",
+      "name": "WebConfig",
+      "filePath": "src/main/java/com/luqiang/seckill/config/WebConfig.java",
+      "lineRange": [
+        9,
+        22
+      ],
+      "summary": "Spring WebMvcConfigurer implementation that configures a view controller for the root path and registers the rate limiter interceptor on /seckill/** URL patterns.",
+      "tags": [
+        "configuration",
+        "spring-mvc"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "class:src/main/java/com/luqiang/seckill/interceptor/RateLimiterInterceptor.java:RateLimiterInterceptor",
+      "type": "class",
+      "name": "RateLimiterInterceptor",
+      "filePath": "src/main/java/com/luqiang/seckill/interceptor/RateLimiterInterceptor.java",
+      "lineRange": [
+        13,
+        36
+      ],
+      "summary": "Spring HandlerInterceptor that applies rate limiting (5000 requests/second) via token bucket, returning HTTP 429 with JSON error when the limit is exceeded.",
+      "tags": [
+        "interceptor",
+        "rate-limiter",
+        "api-handler"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:src/main/java/com/luqiang/seckill/interceptor/RateLimiterInterceptor.java:preHandle",
+      "type": "function",
+      "name": "preHandle",
+      "filePath": "src/main/java/com/luqiang/seckill/interceptor/RateLimiterInterceptor.java",
+      "lineRange": [
+        18,
+        31
+      ],
+      "summary": "Intercepts incoming HTTP requests, checks the rate limiter allowance, and either proceeds with the request or writes a 429 JSON error response.",
+      "tags": [
+        "interceptor",
+        "rate-limiting"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "service:docker-compose.yml",
+      "type": "service",
+      "name": "docker-compose.yml",
+      "filePath": "docker-compose.yml",
+      "summary": "Docker Compose orchestrating a flash-sale system with MySQL 8.0, Redis Sentinel cluster (1 master, 1 replica, 3 sentinels), and the Spring Boot application service, all with health checks, dependency ordering, and persistent volumes.",
+      "tags": [
+        "orchestration",
+        "infrastructure",
+        "deployment",
+        "redis",
+        "mysql"
+      ],
+      "complexity": "moderate"
+    },
+    {
+      "id": "service:Dockerfile",
+      "type": "service",
+      "name": "Dockerfile",
+      "filePath": "Dockerfile",
+      "summary": "Single-stage production Docker image for the Spring Boot flash-sale application based on Eclipse Temurin 17 JRE, copying the pre-built JAR and exposing port 8080 with the docker Spring profile.",
+      "tags": [
+        "containerization",
+        "infrastructure",
+        "deployment"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "document:CLAUDE.md",
+      "type": "document",
+      "name": "CLAUDE.md",
+      "filePath": "CLAUDE.md",
+      "summary": "Behavioral guidelines for Claude Code AI agents, defining four principles: think before coding, simplicity first, surgical changes, and goal-driven execution.",
+      "tags": [
+        "documentation",
+        "guidelines",
+        "development"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "document:README.md",
+      "type": "document",
+      "name": "README.md",
+      "filePath": "README.md",
+      "summary": "Project overview documenting the high-concurrency flash-sale system architecture with stress test results (370.9 QPS), core design patterns (inventory segmentation, Redis pipeline, batch persistence), API reference, and tuning history.",
+      "tags": [
+        "documentation",
+        "architecture",
+        "performance",
+        "api-schema"
+      ],
+      "complexity": "moderate",
+      "languageNotes": "Written in Chinese with architecture diagrams, benchmark tables, and project structure map."
+    },
+    {
+      "id": "file:mvnw.cmd",
+      "type": "file",
+      "name": "mvnw.cmd",
+      "filePath": "mvnw.cmd",
+      "summary": "Apache Maven Wrapper startup script that downloads and installs the correct Maven distribution with SHA-256 validation, then delegates builds to the Maven binary.",
+      "tags": [
+        "build-system",
+        "script",
+        "maven"
+      ],
+      "complexity": "moderate",
+      "languageNotes": "Hybrid batch and PowerShell script -- the batch portion delegates to embedded PowerShell logic for download, checksum verification, and extraction."
+    },
+    {
+      "id": "config:pom.xml",
+      "type": "config",
+      "name": "pom.xml",
+      "filePath": "pom.xml",
+      "summary": "Maven project configuration for the seckill-system, defining Spring Boot 3.2.5 parent, Java 17, and dependencies including Spring Web, JPA, Redis, MyBatis, JWT, MySQL, and Lombok.",
+      "tags": [
+        "configuration",
+        "maven",
+        "build-system",
+        "dependencies"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "document:docs/agents/domain.md",
+      "type": "document",
+      "name": "domain.md",
+      "filePath": "docs/agents/domain.md",
+      "summary": "Instructions for how agent skills should consume the repo's domain documentation (CONTEXT.md, ADRs) when exploring the codebase, covering single-context and multi-context layouts, glossary vocabulary usage, and ADR conflict flagging.",
+      "tags": [
+        "documentation",
+        "domain-model",
+        "architecture",
+        "adr",
+        "conventions"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "document:docs/agents/issue-tracker.md",
+      "type": "document",
+      "name": "issue-tracker.md",
+      "filePath": "docs/agents/issue-tracker.md",
+      "summary": "Defines the GitHub issue tracker conventions and gh CLI commands that agent skills should use for creating, reading, commenting on, and closing issues.",
+      "tags": [
+        "documentation",
+        "issue-tracking",
+        "conventions",
+        "github"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "document:docs/agents/triage-labels.md",
+      "type": "document",
+      "name": "triage-labels.md",
+      "filePath": "docs/agents/triage-labels.md",
+      "summary": "Maps the five canonical triage role labels (needs-triage, needs-info, ready-for-agent, ready-for-human, wontfix) to the actual label strings used in this repo's issue tracker.",
+      "tags": [
+        "documentation",
+        "triage",
+        "labels",
+        "conventions"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "config:src/main/resources/application.yml",
+      "type": "config",
+      "name": "application.yml",
+      "filePath": "src/main/resources/application.yml",
+      "summary": "Main Spring Boot application configuration with Tomcat thread pool tuning (max 500), HikariCP datasource pool (max 30), Redis Sentinel/Lettuce connection pool (max-active 100), JPA auto-update, Jackson timezone, and scheduled task pool (size 4) for the seckill system.",
+      "tags": [
+        "configuration",
+        "spring-boot",
+        "server",
+        "datasource",
+        "redis"
+      ],
+      "complexity": "moderate"
+    },
+    {
+      "id": "config:src/main/resources/application-docker.yml",
+      "type": "config",
+      "name": "application-docker.yml",
+      "filePath": "src/main/resources/application-docker.yml",
+      "summary": "Docker-specific Spring Boot configuration that overrides datasource to connect to MySQL at the Docker service hostname and configures Redis Sentinel cluster nodes for containerized deployment with SQL init disabled.",
+      "tags": [
+        "configuration",
+        "spring-boot",
+        "docker",
+        "datasource",
+        "redis"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "table:src/main/resources/data.sql",
+      "type": "table",
+      "name": "data.sql",
+      "filePath": "src/main/resources/data.sql",
+      "summary": "Data seeding script that clears existing test orders and goods records, then inserts a single seckill_goods record with ID 1 and stock 100 for development and testing.",
+      "tags": [
+        "database",
+        "seed-data",
+        "test",
+        "seckill"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "table:src/main/resources/schema.sql",
+      "type": "table",
+      "name": "schema.sql",
+      "filePath": "src/main/resources/schema.sql",
+      "summary": "Database schema defining the seckill_goods table (ID and stock columns) and the seckill_order table (goods ID, user ID, timestamp, status) with an index on goods_id and a unique constraint on the goods-user pair.",
+      "tags": [
+        "database",
+        "schema",
+        "migration",
+        "seckill"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "table:src/main/resources/schema.sql:seckill_goods",
+      "type": "table",
+      "name": "seckill_goods",
+      "filePath": "src/main/resources/schema.sql",
+      "lineRange": [
+        1,
+        4
+      ],
+      "summary": "Flash-sale goods table with a BIGINT primary key ID and an INT stock column for tracking available inventory per goods item.",
+      "tags": [
+        "database",
+        "goods",
+        "stock",
+        "table"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "table:src/main/resources/schema.sql:seckill_order",
+      "type": "table",
+      "name": "seckill_order",
+      "filePath": "src/main/resources/schema.sql",
+      "lineRange": [
+        8,
+        16
+      ],
+      "summary": "Flash-sale order table recording each purchase with goods ID, user ID, creation datetime, and a status field (0=pending, 1=paid, 2=cancelled), with an index on goods_id and a unique constraint on goods_id plus user_id.",
+      "tags": [
+        "database",
+        "order",
+        "user",
+        "table"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "file:.gitattributes",
+      "type": "file",
+      "name": ".gitattributes",
+      "filePath": ".gitattributes",
+      "summary": "Git attributes file configuring line-ending normalization (LF for shell scripts, CRLF for batch files) across the repository.",
+      "tags": [
+        "configuration",
+        "git",
+        "line-endings"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "config:.mvn/wrapper/maven-wrapper.properties",
+      "type": "config",
+      "name": "maven-wrapper.properties",
+      "filePath": ".mvn/wrapper/maven-wrapper.properties",
+      "summary": "Maven Wrapper configuration specifying the Apache Maven 3.9.14 distribution URL for reproducible builds.",
+      "tags": [
+        "configuration",
+        "build-system",
+        "maven"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "file:.understand-anything/.understandignore",
+      "type": "file",
+      "name": ".understandignore",
+      "filePath": ".understand-anything/.understandignore",
+      "summary": "Understand-Anything analysis exclusion list with commented patterns for build artifacts, IDE files, test outputs, and other directories to skip during codebase analysis.",
+      "tags": [
+        "configuration",
+        "analysis",
+        "exclusions"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "file:config/redis.conf",
+      "type": "file",
+      "name": "redis.conf",
+      "filePath": "config/redis.conf",
+      "summary": "Redis persistence configuration using RDB snapshots, AOF logging with everysec fsync, and Redis 7+ hybrid persistence for production durability in the seckill system.",
+      "tags": [
+        "configuration",
+        "redis",
+        "persistence",
+        "cache"
+      ],
+      "complexity": "moderate",
+      "languageNotes": "Redis 7+ hybrid persistence combining RDB fast restart with AOF incremental log for minimal data loss."
+    },
+    {
+      "id": "file:config/sentinel-entrypoint.sh",
+      "type": "file",
+      "name": "sentinel-entrypoint.sh",
+      "filePath": "config/sentinel-entrypoint.sh",
+      "summary": "Docker entrypoint script that resolves the Redis master hostname at runtime, generates a Sentinel configuration file, and launches redis-sentinel.",
+      "tags": [
+        "script",
+        "redis",
+        "sentinel",
+        "containerization"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "file:config/sentinel.conf",
+      "type": "file",
+      "name": "sentinel.conf",
+      "filePath": "config/sentinel.conf",
+      "summary": "Redis Sentinel configuration for a 3-node quorum-based failover cluster monitoring the seckill-master Redis instance.",
+      "tags": [
+        "configuration",
+        "redis",
+        "sentinel",
+        "high-availability"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "file:docker/mysql/init.sql",
+      "type": "file",
+      "name": "init.sql",
+      "filePath": "docker/mysql/init.sql",
+      "summary": "MySQL database initialization script that creates the seckill database, defines goods and seckill_order tables with indexes, and inserts seed product data.",
+      "tags": [
+        "database",
+        "migration",
+        "schema-definition",
+        "sql"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "table:docker/mysql/init.sql:goods",
+      "type": "table",
+      "name": "goods",
+      "filePath": "docker/mysql/init.sql",
+      "lineRange": [
+        8,
+        13
+      ],
+      "summary": "Product catalog table with id, name, price, and stock columns for seckill merchandise.",
+      "tags": [
+        "database",
+        "table",
+        "product"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "table:docker/mysql/init.sql:seckill_order",
+      "type": "table",
+      "name": "seckill_order",
+      "filePath": "docker/mysql/init.sql",
+      "lineRange": [
+        15,
+        23
+      ],
+      "summary": "Seckill order table with goods and user references, timestamp, status tracking, and a unique constraint on (goods_id, user_id) to prevent duplicate purchases.",
+      "tags": [
+        "database",
+        "table",
+        "order",
+        "unique-constraint"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "document:docs/adr/stress-test-pipeline-2026-05-18.md",
+      "type": "document",
+      "name": "stress-test-pipeline-2026-05-18.md",
+      "filePath": "docs/adr/stress-test-pipeline-2026-05-18.md",
+      "summary": "Architecture decision record (ADR) documenting the pipeline optimization stress test results, including throughput, latency distribution, batch order persistence, and comparison against previous QPS benchmarks.",
+      "tags": [
+        "documentation",
+        "adr",
+        "stress-test",
+        "performance"
+      ],
+      "complexity": "moderate",
+      "languageNotes": "Chinese-language ADR with 9 sections covering test environment, optimizations, parameters, results, bottleneck analysis, and future directions."
+    },
+    {
+      "id": "document:docs/adr/stress-test-qps-2026-05-14.md",
+      "type": "document",
+      "name": "stress-test-qps-2026-05-14.md",
+      "filePath": "docs/adr/stress-test-qps-2026-05-14.md",
+      "summary": "Architecture decision record (ADR) documenting the initial QPS stress test results comparing single-key vs segmented Redis stock and JWT authentication overhead before pipeline optimization.",
+      "tags": [
+        "documentation",
+        "adr",
+        "stress-test",
+        "qps",
+        "benchmark"
+      ],
+      "complexity": "moderate",
+      "languageNotes": "Chinese-language ADR with before/after comparison tables showing QPS improvements from stock segmentation and JWT bypass."
+    },
+    {
+      "id": "document:docs/load-test-report.md",
+      "type": "document",
+      "name": "load-test-report.md",
+      "filePath": "docs/load-test-report.md",
+      "summary": "Comprehensive load test report covering JMeter and wrk benchmarking results, QPS formula validation, component headroom analysis, and full business-logic latency breakdown for the seckill system.",
+      "tags": [
+        "documentation",
+        "load-test",
+        "performance",
+        "benchmark",
+        "analysis"
+      ],
+      "complexity": "moderate",
+      "languageNotes": "Chinese-language report with 6 sections covering JMeter and wrk results, multi-instance scaling tests, bottleneck analysis, and QPS formula derivation."
+    },
+    {
+      "id": "file:jmeter/dashboard.html",
+      "type": "file",
+      "name": "dashboard.html",
+      "filePath": "jmeter/dashboard.html",
+      "summary": "JMeter HTML dashboard report visualizing load test results with charts and metrics for the seckill system performance tests.",
+      "tags": [
+        "report",
+        "jmeter",
+        "dashboard",
+        "performance"
+      ],
+      "complexity": "complex"
+    },
+    {
+      "id": "file:jmeter/seckill-pure-test.jmx",
+      "type": "file",
+      "name": "seckill-pure-test.jmx",
+      "filePath": "jmeter/seckill-pure-test.jmx",
+      "summary": "JMeter test plan for pure seckill throughput without authentication overhead, used to measure baseline endpoint performance.",
+      "tags": [
+        "jmeter",
+        "test",
+        "performance",
+        "benchmark"
+      ],
+      "complexity": "moderate"
+    },
+    {
+      "id": "file:jmeter/seckill-stress-test.jmx",
+      "type": "file",
+      "name": "seckill-stress-test.jmx",
+      "filePath": "jmeter/seckill-stress-test.jmx",
+      "summary": "JMeter stress test plan simulating high-concurrency seckill requests to evaluate system throughput and latency under load.",
+      "tags": [
+        "jmeter",
+        "stress-test",
+        "performance",
+        "concurrency"
+      ],
+      "complexity": "moderate"
+    },
+    {
+      "id": "file:mvnw",
+      "type": "file",
+      "name": "mvnw",
+      "filePath": "mvnw",
+      "summary": "Apache Maven Wrapper shell script that automatically downloads and executes the correct Maven version (3.9.14) for reproducible project builds across environments.",
+      "tags": [
+        "build-system",
+        "maven",
+        "script",
+        "wrapper"
+      ],
+      "complexity": "complex",
+      "languageNotes": "Portable POSIX shell script with Cygwin/Mingw support, SHA-256 distribution validation, and fallback to Java-based download."
+    },
+    {
+      "id": "function:mvnw:set_java_home",
+      "type": "function",
+      "name": "set_java_home",
+      "filePath": "mvnw",
+      "lineRange": [
+        45,
+        78
+      ],
+      "summary": "Resolves the Java runtime location from JAVA_HOME or PATH, validating that both java and javac executables exist before proceeding.",
+      "tags": [
+        "utility",
+        "shell",
+        "java",
+        "setup"
+      ],
+      "complexity": "moderate"
+    },
+    {
+      "id": "file:src/main/java/com/luqiang/seckill/common/GlobalExceptionHandler.java",
+      "type": "file",
+      "name": "GlobalExceptionHandler.java",
+      "filePath": "src/main/java/com/luqiang/seckill/common/GlobalExceptionHandler.java",
+      "summary": "Global REST exception handler using @RestControllerAdvice to catch validation constraint violations, method argument validation errors, and generic exceptions, returning structured ApiResponse error objects.",
+      "tags": [
+        "api-handler",
+        "error-handling",
+        "validation",
+        "spring-boot"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:src/main/java/com/luqiang/seckill/common/GlobalExceptionHandler.java:handleConstraintViolation",
+      "type": "function",
+      "name": "handleConstraintViolation",
+      "filePath": "src/main/java/com/luqiang/seckill/common/GlobalExceptionHandler.java",
+      "lineRange": [
+        11,
+        18
+      ],
+      "summary": "Handles ConstraintViolationException by extracting the field validation error message after the last colon and returning it in an ApiResponse with -400 code.",
+      "tags": [
+        "validation",
+        "error-handling",
+        "exception-handler"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:src/main/java/com/luqiang/seckill/common/GlobalExceptionHandler.java:handleMethodArgumentNotValid",
+      "type": "function",
+      "name": "handleMethodArgumentNotValid",
+      "filePath": "src/main/java/com/luqiang/seckill/common/GlobalExceptionHandler.java",
+      "lineRange": [
+        20,
+        26
+      ],
+      "summary": "Handles MethodArgumentNotValidException by extracting the field-level validation error message from the binding result and returning it in an ApiResponse with -400 code.",
+      "tags": [
+        "validation",
+        "error-handling",
+        "exception-handler"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:src/main/java/com/luqiang/seckill/common/GlobalExceptionHandler.java:handleException",
+      "type": "function",
+      "name": "handleException",
+      "filePath": "src/main/java/com/luqiang/seckill/common/GlobalExceptionHandler.java",
+      "lineRange": [
+        28,
+        31
+      ],
+      "summary": "Generic fallback exception handler that catches all unhandled exceptions and returns a server error ApiResponse with -500 code and the exception class name.",
+      "tags": [
+        "error-handling",
+        "fallback",
+        "exception-handler"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "class:src/main/java/com/luqiang/seckill/common/GlobalExceptionHandler.java:GlobalExceptionHandler",
+      "type": "class",
+      "name": "GlobalExceptionHandler",
+      "filePath": "src/main/java/com/luqiang/seckill/common/GlobalExceptionHandler.java",
+      "lineRange": [
+        8,
+        32
+      ],
+      "summary": "@RestControllerAdvice class providing centralized exception handling for ConstraintViolationException, MethodArgumentNotValidException, and generic Exception types across all REST controllers.",
+      "tags": [
+        "api-handler",
+        "error-handling",
+        "spring-boot",
+        "controller-advice"
+      ],
+      "complexity": "moderate"
+    },
+    {
+      "id": "file:src/main/java/com/luqiang/seckill/config/RedisConfig.java",
+      "type": "file",
+      "name": "RedisConfig.java",
+      "filePath": "src/main/java/com/luqiang/seckill/config/RedisConfig.java",
+      "summary": "Redis client configuration bean customizing the Lettuce connection pool with 3-second command timeout, auto-reconnect, and REJECT_COMMANDS disconnected behavior for fast failure under load.",
+      "tags": [
+        "configuration",
+        "redis",
+        "lettuce",
+        "spring-boot"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:src/main/java/com/luqiang/seckill/config/RedisConfig.java:lettuceCustomizer",
+      "type": "function",
+      "name": "lettuceCustomizer",
+      "filePath": "src/main/java/com/luqiang/seckill/config/RedisConfig.java",
+      "lineRange": [
+        13,
+        21
+      ],
+      "summary": "@Bean factory method returning a LettuceClientConfigurationBuilderCustomizer that sets a 3-second command timeout and configures auto-reconnect with REJECT_COMMANDS disconnected behavior.",
+      "tags": [
+        "configuration",
+        "redis",
+        "lettuce",
+        "bean"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "class:src/main/java/com/luqiang/seckill/config/RedisConfig.java:RedisConfig",
+      "type": "class",
+      "name": "RedisConfig",
+      "filePath": "src/main/java/com/luqiang/seckill/config/RedisConfig.java",
+      "lineRange": [
+        10,
+        22
+      ],
+      "summary": "@Configuration class defining the Lettuce Redis client customizer bean with aggressive timeout and fast-fail disconnected behavior for seckill system resilience.",
+      "tags": [
+        "configuration",
+        "redis",
+        "spring-boot",
+        "lettuce"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "file:src/main/java/com/luqiang/seckill/scheduler/OrderPersistScheduler.java",
+      "type": "file",
+      "name": "OrderPersistScheduler.java",
+      "filePath": "src/main/java/com/luqiang/seckill/scheduler/OrderPersistScheduler.java",
+      "summary": "Scheduled task that batches dequeue orders from the Redis-backed OrderQueueService every 200ms and bulk-inserts them into MySQL with fallback re-enqueue on failure.",
+      "tags": [
+        "scheduler",
+        "database",
+        "batch",
+        "queue",
+        "persistence"
+      ],
+      "complexity": "moderate"
+    },
+    {
+      "id": "function:src/main/java/com/luqiang/seckill/scheduler/OrderPersistScheduler.java:OrderPersistScheduler",
+      "type": "function",
+      "name": "OrderPersistScheduler",
+      "filePath": "src/main/java/com/luqiang/seckill/scheduler/OrderPersistScheduler.java",
+      "lineRange": [
+        23,
+        26
+      ],
+      "summary": "Constructor injecting OrderQueueService and JdbcTemplate dependencies for batch order persistence.",
+      "tags": [
+        "constructor",
+        "dependency-injection"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:src/main/java/com/luqiang/seckill/scheduler/OrderPersistScheduler.java:consumeQueue",
+      "type": "function",
+      "name": "consumeQueue",
+      "filePath": "src/main/java/com/luqiang/seckill/scheduler/OrderPersistScheduler.java",
+      "lineRange": [
+        28,
+        56
+      ],
+      "summary": "@Scheduled method that pulls up to 200 orders from the Redis queue, batch-inserts them into seckill_order via JDBC batchUpdate with upsert semantics, and re-enqueues on batch failure to prevent data loss.",
+      "tags": [
+        "scheduled",
+        "batch",
+        "persistence",
+        "queue-consumer"
+      ],
+      "complexity": "moderate"
+    },
+    {
+      "id": "class:src/main/java/com/luqiang/seckill/scheduler/OrderPersistScheduler.java:OrderPersistScheduler",
+      "type": "class",
+      "name": "OrderPersistScheduler",
+      "filePath": "src/main/java/com/luqiang/seckill/scheduler/OrderPersistScheduler.java",
+      "lineRange": [
+        14,
+        57
+      ],
+      "summary": "@Component scheduled service that bridges the Redis order queue to MySQL by periodically draining batches of orders with transactional bulk inserts and error recovery.",
+      "tags": [
+        "scheduler",
+        "batch",
+        "persistence",
+        "queue",
+        "spring-boot"
+      ],
+      "complexity": "moderate"
+    },
+    {
+      "id": "file:src/main/java/com/luqiang/seckill/service/OrderQueueService.java",
+      "type": "file",
+      "name": "OrderQueueService.java",
+      "filePath": "src/main/java/com/luqiang/seckill/service/OrderQueueService.java",
+      "summary": "Redis-backed order queue service using a Lua script for atomic batch dequeue, providing enqueue, dequeue, and size operations for the seckill order pipeline.",
+      "tags": [
+        "service",
+        "queue",
+        "redis",
+        "lua",
+        "order"
+      ],
+      "complexity": "moderate"
+    },
+    {
+      "id": "function:src/main/java/com/luqiang/seckill/service/OrderQueueService.java:OrderQueueService",
+      "type": "function",
+      "name": "OrderQueueService",
+      "filePath": "src/main/java/com/luqiang/seckill/service/OrderQueueService.java",
+      "lineRange": [
+        35,
+        37
+      ],
+      "summary": "Constructor injecting StringRedisTemplate for Redis list operations used by the order queue.",
+      "tags": [
+        "constructor",
+        "dependency-injection"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:src/main/java/com/luqiang/seckill/service/OrderQueueService.java:enqueue",
+      "type": "function",
+      "name": "enqueue",
+      "filePath": "src/main/java/com/luqiang/seckill/service/OrderQueueService.java",
+      "lineRange": [
+        39,
+        48
+      ],
+      "summary": "Pushes a goodsId:userId pair to the left side of the Redis order queue list and sets a 10-minute TTL, returning false on any Redis error.",
+      "tags": [
+        "queue",
+        "redis",
+        "enqueue",
+        "order"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:src/main/java/com/luqiang/seckill/service/OrderQueueService.java:dequeueBatch",
+      "type": "function",
+      "name": "dequeueBatch",
+      "filePath": "src/main/java/com/luqiang/seckill/service/OrderQueueService.java",
+      "lineRange": [
+        50,
+        58
+      ],
+      "summary": "Atomically dequeues up to batchSize items from the right side of the Redis list using a pre-registered Lua script (LRANGE + LTRIM), returning an empty list on no data.",
+      "tags": [
+        "queue",
+        "redis",
+        "dequeue",
+        "lua",
+        "batch"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:src/main/java/com/luqiang/seckill/service/OrderQueueService.java:enqueueRaw",
+      "type": "function",
+      "name": "enqueueRaw",
+      "filePath": "src/main/java/com/luqiang/seckill/service/OrderQueueService.java",
+      "lineRange": [
+        60,
+        63
+      ],
+      "summary": "Pushes a pre-formatted raw order string to the right side of the Redis queue with TTL extension, used for re-enqueuing failed batch items.",
+      "tags": [
+        "queue",
+        "redis",
+        "enqueue",
+        "recovery"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:src/main/java/com/luqiang/seckill/service/OrderQueueService.java:queueSize",
+      "type": "function",
+      "name": "queueSize",
+      "filePath": "src/main/java/com/luqiang/seckill/service/OrderQueueService.java",
+      "lineRange": [
+        65,
+        68
+      ],
+      "summary": "Returns the current number of pending orders in the Redis queue, defaulting to 0 if the key does not exist.",
+      "tags": [
+        "queue",
+        "redis",
+        "monitoring"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "class:src/main/java/com/luqiang/seckill/service/OrderQueueService.java:OrderQueueService",
+      "type": "class",
+      "name": "OrderQueueService",
+      "filePath": "src/main/java/com/luqiang/seckill/service/OrderQueueService.java",
+      "lineRange": [
+        12,
+        69
+      ],
+      "summary": "@Service class implementing a Redis list-based FIFO order queue with a Lua-scripted batch dequeue, 10-minute key expiry, and raw re-enqueue capability for error recovery.",
+      "tags": [
+        "service",
+        "queue",
+        "redis",
+        "lua",
+        "spring-boot"
+      ],
+      "complexity": "moderate"
+    },
+    {
+      "id": "file:src/main/resources/static/dashboard.html",
+      "type": "file",
+      "name": "dashboard.html",
+      "filePath": "src/main/resources/static/dashboard.html",
+      "summary": "Seckill system monitoring dashboard HTML page displaying real-time order metrics, Redis queue depth, stock status, and throughput charts.",
+      "tags": [
+        "frontend",
+        "dashboard",
+        "monitoring",
+        "html"
+      ],
+      "complexity": "complex"
+    },
+    {
+      "id": "file:src/main/resources/static/seckill.html",
+      "type": "file",
+      "name": "seckill.html",
+      "filePath": "src/main/resources/static/seckill.html",
+      "summary": "Main seckill flash-sale frontend page with product listing, purchase buttons, countdown timers, and AJAX order submission.",
+      "tags": [
+        "frontend",
+        "seckill",
+        "flash-sale",
+        "html"
+      ],
+      "complexity": "complex"
+    },
+    {
+      "id": "file:src/test/java/com/luqiang/seckill/SeckillSystemApplicationTests.java",
+      "type": "file",
+      "name": "SeckillSystemApplicationTests.java",
+      "filePath": "src/test/java/com/luqiang/seckill/SeckillSystemApplicationTests.java",
+      "summary": "Spring Boot smoke test verifying that the application context loads successfully.",
+      "tags": [
+        "test",
+        "smoke-test",
+        "spring-boot"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "file:src/test/java/SeckillSystemApplication.java",
+      "type": "file",
+      "name": "SeckillSystemApplication.java",
+      "filePath": "src/test/java/SeckillSystemApplication.java",
+      "summary": "Empty placeholder test file (no content) at an alternative package location.",
+      "tags": [
+        "test",
+        "placeholder"
+      ],
+      "complexity": "simple"
+    }
+  ],
+  "edges": [
+    {
+      "source": "file:src/main/java/com/luqiang/seckill/SeckillSystemApplication.java",
+      "target": "file:src/main/java/com/luqiang/seckill/common/BloomFilter.java",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/main/java/com/luqiang/seckill/SeckillSystemApplication.java",
+      "target": "file:src/main/java/com/luqiang/seckill/common/CacheConstants.java",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/main/java/com/luqiang/seckill/SeckillSystemApplication.java",
+      "target": "file:src/main/java/com/luqiang/seckill/common/LocalStockCache.java",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/main/java/com/luqiang/seckill/SeckillSystemApplication.java",
+      "target": "file:src/main/java/com/luqiang/seckill/entity/Goods.java",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/main/java/com/luqiang/seckill/SeckillSystemApplication.java",
+      "target": "file:src/main/java/com/luqiang/seckill/mapper/GoodsMapper.java",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/main/java/com/luqiang/seckill/mapper/GoodsMapper.java",
+      "target": "file:src/main/java/com/luqiang/seckill/entity/Goods.java",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/main/java/com/luqiang/seckill/repository/OrderInfoRepository.java",
+      "target": "file:src/main/java/com/luqiang/seckill/entity/OrderInfo.java",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/main/java/com/luqiang/seckill/scheduler/OrderCancelScheduler.java",
+      "target": "file:src/main/java/com/luqiang/seckill/common/CacheConstants.java",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/main/java/com/luqiang/seckill/service/impl/SeckillServiceImpl.java",
+      "target": "file:src/main/java/com/luqiang/seckill/common/ApiResponse.java",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/main/java/com/luqiang/seckill/service/impl/SeckillServiceImpl.java",
+      "target": "file:src/main/java/com/luqiang/seckill/common/BloomFilter.java",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/main/java/com/luqiang/seckill/service/impl/SeckillServiceImpl.java",
+      "target": "file:src/main/java/com/luqiang/seckill/common/CacheConstants.java",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/main/java/com/luqiang/seckill/service/impl/SeckillServiceImpl.java",
+      "target": "file:src/main/java/com/luqiang/seckill/common/LocalStockCache.java",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/main/java/com/luqiang/seckill/service/impl/SeckillServiceImpl.java",
+      "target": "file:src/main/java/com/luqiang/seckill/entity/Goods.java",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/main/java/com/luqiang/seckill/service/impl/SeckillServiceImpl.java",
+      "target": "file:src/main/java/com/luqiang/seckill/entity/OrderInfo.java",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/main/java/com/luqiang/seckill/service/impl/SeckillServiceImpl.java",
+      "target": "file:src/main/java/com/luqiang/seckill/repository/GoodsRepository.java",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/main/java/com/luqiang/seckill/service/impl/SeckillServiceImpl.java",
+      "target": "file:src/main/java/com/luqiang/seckill/repository/OrderInfoRepository.java",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/main/java/com/luqiang/seckill/service/impl/SeckillServiceImpl.java",
+      "target": "file:src/main/java/com/luqiang/seckill/service/SeckillService.java",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/main/java/com/luqiang/seckill/SeckillSystemApplication.java",
+      "target": "class:src/main/java/com/luqiang/seckill/SeckillSystemApplication.java:SeckillSystemApplication",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:src/main/java/com/luqiang/seckill/SeckillSystemApplication.java",
+      "target": "function:src/main/java/com/luqiang/seckill/SeckillSystemApplication.java:checkDatabase",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:src/main/java/com/luqiang/seckill/SeckillSystemApplication.java",
+      "target": "function:src/main/java/com/luqiang/seckill/SeckillSystemApplication.java:initStock",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:src/main/java/com/luqiang/seckill/common/BloomFilter.java",
+      "target": "class:src/main/java/com/luqiang/seckill/common/BloomFilter.java:BloomFilter",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:src/main/java/com/luqiang/seckill/common/BloomFilter.java",
+      "target": "function:src/main/java/com/luqiang/seckill/common/BloomFilter.java:add",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:src/main/java/com/luqiang/seckill/common/BloomFilter.java",
+      "target": "function:src/main/java/com/luqiang/seckill/common/BloomFilter.java:mightContain",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:src/main/java/com/luqiang/seckill/common/BloomFilter.java",
+      "target": "function:src/main/java/com/luqiang/seckill/common/BloomFilter.java:initAll",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:src/main/java/com/luqiang/seckill/common/CacheConstants.java",
+      "target": "class:src/main/java/com/luqiang/seckill/common/CacheConstants.java:CacheConstants",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:src/main/java/com/luqiang/seckill/common/LocalStockCache.java",
+      "target": "class:src/main/java/com/luqiang/seckill/common/LocalStockCache.java:LocalStockCache",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:src/main/java/com/luqiang/seckill/common/LocalStockCache.java",
+      "target": "function:src/main/java/com/luqiang/seckill/common/LocalStockCache.java:acquire",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:src/main/java/com/luqiang/seckill/common/LocalStockCache.java",
+      "target": "function:src/main/java/com/luqiang/seckill/common/LocalStockCache.java:preFill",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:src/main/java/com/luqiang/seckill/common/LocalStockCache.java",
+      "target": "function:src/main/java/com/luqiang/seckill/common/LocalStockCache.java:returnStock",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:src/main/java/com/luqiang/seckill/common/LocalStockCache.java",
+      "target": "function:src/main/java/com/luqiang/seckill/common/LocalStockCache.java:returnUnusedStock",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:src/main/java/com/luqiang/seckill/mapper/GoodsMapper.java",
+      "target": "class:src/main/java/com/luqiang/seckill/mapper/GoodsMapper.java:GoodsMapper",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:src/main/java/com/luqiang/seckill/repository/OrderInfoRepository.java",
+      "target": "class:src/main/java/com/luqiang/seckill/repository/OrderInfoRepository.java:OrderInfoRepository",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:src/main/java/com/luqiang/seckill/scheduler/OrderCancelScheduler.java",
+      "target": "class:src/main/java/com/luqiang/seckill/scheduler/OrderCancelScheduler.java:OrderCancelScheduler",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:src/main/java/com/luqiang/seckill/scheduler/OrderCancelScheduler.java",
+      "target": "function:src/main/java/com/luqiang/seckill/scheduler/OrderCancelScheduler.java:cancelExpiredOrders",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:src/main/java/com/luqiang/seckill/scheduler/OrderCancelScheduler.java",
+      "target": "function:src/main/java/com/luqiang/seckill/scheduler/OrderCancelScheduler.java:processCancellation",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:src/main/java/com/luqiang/seckill/service/impl/SeckillServiceImpl.java",
+      "target": "class:src/main/java/com/luqiang/seckill/service/impl/SeckillServiceImpl.java:SeckillServiceImpl",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:src/main/java/com/luqiang/seckill/service/impl/SeckillServiceImpl.java",
+      "target": "function:src/main/java/com/luqiang/seckill/service/impl/SeckillServiceImpl.java:executeSeckill",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:src/main/java/com/luqiang/seckill/service/impl/SeckillServiceImpl.java",
+      "target": "function:src/main/java/com/luqiang/seckill/service/impl/SeckillServiceImpl.java:getStock",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:src/main/java/com/luqiang/seckill/service/impl/SeckillServiceImpl.java",
+      "target": "function:src/main/java/com/luqiang/seckill/service/impl/SeckillServiceImpl.java:getResult",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:src/main/java/com/luqiang/seckill/service/impl/SeckillServiceImpl.java",
+      "target": "function:src/main/java/com/luqiang/seckill/service/impl/SeckillServiceImpl.java:warmupStock",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:src/main/java/com/luqiang/seckill/SeckillSystemApplication.java",
+      "target": "class:src/main/java/com/luqiang/seckill/SeckillSystemApplication.java:SeckillSystemApplication",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:src/main/java/com/luqiang/seckill/SeckillSystemApplication.java",
+      "target": "function:src/main/java/com/luqiang/seckill/SeckillSystemApplication.java:checkDatabase",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:src/main/java/com/luqiang/seckill/SeckillSystemApplication.java",
+      "target": "function:src/main/java/com/luqiang/seckill/SeckillSystemApplication.java:initStock",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:src/main/java/com/luqiang/seckill/common/BloomFilter.java",
+      "target": "class:src/main/java/com/luqiang/seckill/common/BloomFilter.java:BloomFilter",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:src/main/java/com/luqiang/seckill/common/BloomFilter.java",
+      "target": "function:src/main/java/com/luqiang/seckill/common/BloomFilter.java:add",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:src/main/java/com/luqiang/seckill/common/BloomFilter.java",
+      "target": "function:src/main/java/com/luqiang/seckill/common/BloomFilter.java:mightContain",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:src/main/java/com/luqiang/seckill/common/BloomFilter.java",
+      "target": "function:src/main/java/com/luqiang/seckill/common/BloomFilter.java:initAll",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:src/main/java/com/luqiang/seckill/common/CacheConstants.java",
+      "target": "class:src/main/java/com/luqiang/seckill/common/CacheConstants.java:CacheConstants",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:src/main/java/com/luqiang/seckill/common/LocalStockCache.java",
+      "target": "class:src/main/java/com/luqiang/seckill/common/LocalStockCache.java:LocalStockCache",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:src/main/java/com/luqiang/seckill/common/LocalStockCache.java",
+      "target": "function:src/main/java/com/luqiang/seckill/common/LocalStockCache.java:acquire",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:src/main/java/com/luqiang/seckill/common/LocalStockCache.java",
+      "target": "function:src/main/java/com/luqiang/seckill/common/LocalStockCache.java:preFill",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:src/main/java/com/luqiang/seckill/common/LocalStockCache.java",
+      "target": "function:src/main/java/com/luqiang/seckill/common/LocalStockCache.java:returnStock",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:src/main/java/com/luqiang/seckill/common/LocalStockCache.java",
+      "target": "function:src/main/java/com/luqiang/seckill/common/LocalStockCache.java:returnUnusedStock",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:src/main/java/com/luqiang/seckill/mapper/GoodsMapper.java",
+      "target": "class:src/main/java/com/luqiang/seckill/mapper/GoodsMapper.java:GoodsMapper",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:src/main/java/com/luqiang/seckill/repository/OrderInfoRepository.java",
+      "target": "class:src/main/java/com/luqiang/seckill/repository/OrderInfoRepository.java:OrderInfoRepository",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:src/main/java/com/luqiang/seckill/scheduler/OrderCancelScheduler.java",
+      "target": "class:src/main/java/com/luqiang/seckill/scheduler/OrderCancelScheduler.java:OrderCancelScheduler",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:src/main/java/com/luqiang/seckill/scheduler/OrderCancelScheduler.java",
+      "target": "function:src/main/java/com/luqiang/seckill/scheduler/OrderCancelScheduler.java:cancelExpiredOrders",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:src/main/java/com/luqiang/seckill/service/impl/SeckillServiceImpl.java",
+      "target": "class:src/main/java/com/luqiang/seckill/service/impl/SeckillServiceImpl.java:SeckillServiceImpl",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:src/main/java/com/luqiang/seckill/service/impl/SeckillServiceImpl.java",
+      "target": "function:src/main/java/com/luqiang/seckill/service/impl/SeckillServiceImpl.java:executeSeckill",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:src/main/java/com/luqiang/seckill/service/impl/SeckillServiceImpl.java",
+      "target": "function:src/main/java/com/luqiang/seckill/service/impl/SeckillServiceImpl.java:getStock",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:src/main/java/com/luqiang/seckill/service/impl/SeckillServiceImpl.java",
+      "target": "function:src/main/java/com/luqiang/seckill/service/impl/SeckillServiceImpl.java:getResult",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "function:src/main/java/com/luqiang/seckill/SeckillSystemApplication.java:initStock",
+      "target": "function:src/main/java/com/luqiang/seckill/common/BloomFilter.java:initAll",
+      "type": "calls",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "function:src/main/java/com/luqiang/seckill/SeckillSystemApplication.java:initStock",
+      "target": "function:src/main/java/com/luqiang/seckill/common/LocalStockCache.java:preFill",
+      "type": "calls",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "function:src/main/java/com/luqiang/seckill/service/impl/SeckillServiceImpl.java:executeSeckill",
+      "target": "function:src/main/java/com/luqiang/seckill/common/BloomFilter.java:mightContain",
+      "type": "calls",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "function:src/main/java/com/luqiang/seckill/service/impl/SeckillServiceImpl.java:executeSeckill",
+      "target": "function:src/main/java/com/luqiang/seckill/common/LocalStockCache.java:acquire",
+      "type": "calls",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "function:src/main/java/com/luqiang/seckill/service/impl/SeckillServiceImpl.java:warmupStock",
+      "target": "function:src/main/java/com/luqiang/seckill/common/BloomFilter.java:add",
+      "type": "calls",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "class:src/main/java/com/luqiang/seckill/service/impl/SeckillServiceImpl.java:SeckillServiceImpl",
+      "target": "class:src/main/java/com/luqiang/seckill/service/SeckillService.java:SeckillService",
+      "type": "implements",
+      "direction": "forward",
+      "weight": 0.9
+    },
+    {
+      "source": "file:src/main/java/com/luqiang/seckill/common/ApiResponse.java",
+      "target": "class:src/main/java/com/luqiang/seckill/common/ApiResponse.java:ApiResponse",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:src/main/java/com/luqiang/seckill/common/ApiResponse.java",
+      "target": "class:src/main/java/com/luqiang/seckill/common/ApiResponse.java:ApiResponse",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:src/main/java/com/luqiang/seckill/common/JwtUtil.java",
+      "target": "class:src/main/java/com/luqiang/seckill/common/JwtUtil.java:JwtUtil",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:src/main/java/com/luqiang/seckill/common/JwtUtil.java",
+      "target": "class:src/main/java/com/luqiang/seckill/common/JwtUtil.java:JwtUtil",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:src/main/java/com/luqiang/seckill/common/JwtUtil.java",
+      "target": "function:src/main/java/com/luqiang/seckill/common/JwtUtil.java:generate",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:src/main/java/com/luqiang/seckill/common/JwtUtil.java",
+      "target": "function:src/main/java/com/luqiang/seckill/common/JwtUtil.java:generate",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:src/main/java/com/luqiang/seckill/common/JwtUtil.java",
+      "target": "function:src/main/java/com/luqiang/seckill/common/JwtUtil.java:parseUserId",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:src/main/java/com/luqiang/seckill/common/JwtUtil.java",
+      "target": "function:src/main/java/com/luqiang/seckill/common/JwtUtil.java:parseUserId",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:src/main/java/com/luqiang/seckill/controller/AuthController.java",
+      "target": "class:src/main/java/com/luqiang/seckill/controller/AuthController.java:AuthController",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:src/main/java/com/luqiang/seckill/controller/AuthController.java",
+      "target": "class:src/main/java/com/luqiang/seckill/controller/AuthController.java:AuthController",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:src/main/java/com/luqiang/seckill/controller/AuthController.java",
+      "target": "function:src/main/java/com/luqiang/seckill/controller/AuthController.java:login",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:src/main/java/com/luqiang/seckill/controller/AuthController.java",
+      "target": "function:src/main/java/com/luqiang/seckill/controller/AuthController.java:login",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:src/main/java/com/luqiang/seckill/controller/SeckillController.java",
+      "target": "class:src/main/java/com/luqiang/seckill/controller/SeckillController.java:SeckillController",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:src/main/java/com/luqiang/seckill/controller/SeckillController.java",
+      "target": "class:src/main/java/com/luqiang/seckill/controller/SeckillController.java:SeckillController",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:src/main/java/com/luqiang/seckill/controller/SeckillController.java",
+      "target": "function:src/main/java/com/luqiang/seckill/controller/SeckillController.java:doSeckill",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:src/main/java/com/luqiang/seckill/controller/SeckillController.java",
+      "target": "function:src/main/java/com/luqiang/seckill/controller/SeckillController.java:doSeckill",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:src/main/java/com/luqiang/seckill/controller/SeckillController.java",
+      "target": "function:src/main/java/com/luqiang/seckill/controller/SeckillController.java:getStock",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:src/main/java/com/luqiang/seckill/controller/SeckillController.java",
+      "target": "function:src/main/java/com/luqiang/seckill/controller/SeckillController.java:getStock",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:src/main/java/com/luqiang/seckill/controller/SeckillController.java",
+      "target": "function:src/main/java/com/luqiang/seckill/controller/SeckillController.java:getResult",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:src/main/java/com/luqiang/seckill/controller/SeckillController.java",
+      "target": "function:src/main/java/com/luqiang/seckill/controller/SeckillController.java:getResult",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:src/main/java/com/luqiang/seckill/entity/OrderInfo.java",
+      "target": "class:src/main/java/com/luqiang/seckill/entity/OrderInfo.java:OrderInfo",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:src/main/java/com/luqiang/seckill/entity/OrderInfo.java",
+      "target": "class:src/main/java/com/luqiang/seckill/entity/OrderInfo.java:OrderInfo",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:src/main/java/com/luqiang/seckill/interceptor/JwtAuthInterceptor.java",
+      "target": "class:src/main/java/com/luqiang/seckill/interceptor/JwtAuthInterceptor.java:JwtAuthInterceptor",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:src/main/java/com/luqiang/seckill/interceptor/JwtAuthInterceptor.java",
+      "target": "class:src/main/java/com/luqiang/seckill/interceptor/JwtAuthInterceptor.java:JwtAuthInterceptor",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:src/main/java/com/luqiang/seckill/interceptor/JwtAuthInterceptor.java",
+      "target": "function:src/main/java/com/luqiang/seckill/interceptor/JwtAuthInterceptor.java:preHandle",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:src/main/java/com/luqiang/seckill/interceptor/JwtAuthInterceptor.java",
+      "target": "function:src/main/java/com/luqiang/seckill/interceptor/JwtAuthInterceptor.java:preHandle",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:src/main/java/com/luqiang/seckill/service/SeckillService.java",
+      "target": "class:src/main/java/com/luqiang/seckill/service/SeckillService.java:SeckillService",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:src/main/java/com/luqiang/seckill/service/SeckillService.java",
+      "target": "class:src/main/java/com/luqiang/seckill/service/SeckillService.java:SeckillService",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:src/main/java/com/luqiang/seckill/controller/AuthController.java",
+      "target": "file:src/main/java/com/luqiang/seckill/common/ApiResponse.java",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/main/java/com/luqiang/seckill/controller/AuthController.java",
+      "target": "file:src/main/java/com/luqiang/seckill/common/JwtUtil.java",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/main/java/com/luqiang/seckill/controller/SeckillController.java",
+      "target": "file:src/main/java/com/luqiang/seckill/common/ApiResponse.java",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/main/java/com/luqiang/seckill/controller/SeckillController.java",
+      "target": "file:src/main/java/com/luqiang/seckill/entity/OrderInfo.java",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/main/java/com/luqiang/seckill/controller/SeckillController.java",
+      "target": "file:src/main/java/com/luqiang/seckill/service/SeckillService.java",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/main/java/com/luqiang/seckill/interceptor/JwtAuthInterceptor.java",
+      "target": "file:src/main/java/com/luqiang/seckill/common/ApiResponse.java",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/main/java/com/luqiang/seckill/interceptor/JwtAuthInterceptor.java",
+      "target": "file:src/main/java/com/luqiang/seckill/common/JwtUtil.java",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/main/java/com/luqiang/seckill/service/SeckillService.java",
+      "target": "file:src/main/java/com/luqiang/seckill/common/ApiResponse.java",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/main/java/com/luqiang/seckill/service/SeckillService.java",
+      "target": "file:src/main/java/com/luqiang/seckill/entity/OrderInfo.java",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "function:src/main/java/com/luqiang/seckill/controller/AuthController.java:login",
+      "target": "function:src/main/java/com/luqiang/seckill/common/JwtUtil.java:generate",
+      "type": "calls",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "function:src/main/java/com/luqiang/seckill/interceptor/JwtAuthInterceptor.java:preHandle",
+      "target": "function:src/main/java/com/luqiang/seckill/common/JwtUtil.java:parseUserId",
+      "type": "calls",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:src/main/java/com/luqiang/seckill/controller/GoodsController.java",
+      "target": "file:src/main/java/com/luqiang/seckill/common/ApiResponse.java",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/main/java/com/luqiang/seckill/controller/GoodsController.java",
+      "target": "file:src/main/java/com/luqiang/seckill/entity/Goods.java",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/main/java/com/luqiang/seckill/controller/GoodsController.java",
+      "target": "file:src/main/java/com/luqiang/seckill/service/GoodsService.java",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/main/java/com/luqiang/seckill/repository/GoodsRepository.java",
+      "target": "file:src/main/java/com/luqiang/seckill/entity/Goods.java",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/main/java/com/luqiang/seckill/service/GoodsService.java",
+      "target": "file:src/main/java/com/luqiang/seckill/entity/Goods.java",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/main/java/com/luqiang/seckill/service/impl/GoodsServiceImpl.java",
+      "target": "file:src/main/java/com/luqiang/seckill/common/CacheConstants.java",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/main/java/com/luqiang/seckill/service/impl/GoodsServiceImpl.java",
+      "target": "file:src/main/java/com/luqiang/seckill/common/RedisUtil.java",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/main/java/com/luqiang/seckill/service/impl/GoodsServiceImpl.java",
+      "target": "file:src/main/java/com/luqiang/seckill/entity/Goods.java",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/main/java/com/luqiang/seckill/service/impl/GoodsServiceImpl.java",
+      "target": "file:src/main/java/com/luqiang/seckill/repository/GoodsRepository.java",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/main/java/com/luqiang/seckill/service/impl/GoodsServiceImpl.java",
+      "target": "file:src/main/java/com/luqiang/seckill/service/GoodsService.java",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/main/java/com/luqiang/seckill/common/RedisUtil.java",
+      "target": "class:src/main/java/com/luqiang/seckill/common/RedisUtil.java:RedisUtil",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:src/main/java/com/luqiang/seckill/controller/GoodsController.java",
+      "target": "class:src/main/java/com/luqiang/seckill/controller/GoodsController.java:GoodsController",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:src/main/java/com/luqiang/seckill/entity/Goods.java",
+      "target": "class:src/main/java/com/luqiang/seckill/entity/Goods.java:Goods",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:src/main/java/com/luqiang/seckill/repository/GoodsRepository.java",
+      "target": "class:src/main/java/com/luqiang/seckill/repository/GoodsRepository.java:GoodsRepository",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:src/main/java/com/luqiang/seckill/service/GoodsService.java",
+      "target": "class:src/main/java/com/luqiang/seckill/service/GoodsService.java:GoodsService",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:src/main/java/com/luqiang/seckill/service/impl/GoodsServiceImpl.java",
+      "target": "class:src/main/java/com/luqiang/seckill/service/impl/GoodsServiceImpl.java:GoodsServiceImpl",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:src/main/java/com/luqiang/seckill/service/impl/GoodsServiceImpl.java",
+      "target": "function:src/main/java/com/luqiang/seckill/service/impl/GoodsServiceImpl.java:listGoods",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:src/main/java/com/luqiang/seckill/common/RedisUtil.java",
+      "target": "class:src/main/java/com/luqiang/seckill/common/RedisUtil.java:RedisUtil",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:src/main/java/com/luqiang/seckill/controller/GoodsController.java",
+      "target": "class:src/main/java/com/luqiang/seckill/controller/GoodsController.java:GoodsController",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:src/main/java/com/luqiang/seckill/entity/Goods.java",
+      "target": "class:src/main/java/com/luqiang/seckill/entity/Goods.java:Goods",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:src/main/java/com/luqiang/seckill/repository/GoodsRepository.java",
+      "target": "class:src/main/java/com/luqiang/seckill/repository/GoodsRepository.java:GoodsRepository",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:src/main/java/com/luqiang/seckill/service/GoodsService.java",
+      "target": "class:src/main/java/com/luqiang/seckill/service/GoodsService.java:GoodsService",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:src/main/java/com/luqiang/seckill/service/impl/GoodsServiceImpl.java",
+      "target": "class:src/main/java/com/luqiang/seckill/service/impl/GoodsServiceImpl.java:GoodsServiceImpl",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:src/main/java/com/luqiang/seckill/service/impl/GoodsServiceImpl.java",
+      "target": "function:src/main/java/com/luqiang/seckill/service/impl/GoodsServiceImpl.java:listGoods",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "class:src/main/java/com/luqiang/seckill/service/impl/GoodsServiceImpl.java:GoodsServiceImpl",
+      "target": "class:src/main/java/com/luqiang/seckill/service/GoodsService.java:GoodsService",
+      "type": "implements",
+      "direction": "forward",
+      "weight": 0.9
+    },
+    {
+      "source": "file:src/main/java/com/luqiang/seckill/config/WebConfig.java",
+      "target": "file:src/main/java/com/luqiang/seckill/interceptor/RateLimiterInterceptor.java",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/main/java/com/luqiang/seckill/interceptor/RateLimiterInterceptor.java",
+      "target": "file:src/main/java/com/luqiang/seckill/common/ApiResponse.java",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/main/java/com/luqiang/seckill/interceptor/RateLimiterInterceptor.java",
+      "target": "file:src/main/java/com/luqiang/seckill/common/TokenBucketRateLimiter.java",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/main/java/com/luqiang/seckill/common/TokenBucketRateLimiter.java",
+      "target": "class:src/main/java/com/luqiang/seckill/common/TokenBucketRateLimiter.java:TokenBucketRateLimiter",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:src/main/java/com/luqiang/seckill/common/TokenBucketRateLimiter.java",
+      "target": "function:src/main/java/com/luqiang/seckill/common/TokenBucketRateLimiter.java:tryAcquire",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:src/main/java/com/luqiang/seckill/config/WebConfig.java",
+      "target": "class:src/main/java/com/luqiang/seckill/config/WebConfig.java:WebConfig",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:src/main/java/com/luqiang/seckill/interceptor/RateLimiterInterceptor.java",
+      "target": "class:src/main/java/com/luqiang/seckill/interceptor/RateLimiterInterceptor.java:RateLimiterInterceptor",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:src/main/java/com/luqiang/seckill/interceptor/RateLimiterInterceptor.java",
+      "target": "function:src/main/java/com/luqiang/seckill/interceptor/RateLimiterInterceptor.java:preHandle",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:src/main/java/com/luqiang/seckill/common/TokenBucketRateLimiter.java",
+      "target": "class:src/main/java/com/luqiang/seckill/common/TokenBucketRateLimiter.java:TokenBucketRateLimiter",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:src/main/java/com/luqiang/seckill/common/TokenBucketRateLimiter.java",
+      "target": "function:src/main/java/com/luqiang/seckill/common/TokenBucketRateLimiter.java:tryAcquire",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:src/main/java/com/luqiang/seckill/config/WebConfig.java",
+      "target": "class:src/main/java/com/luqiang/seckill/config/WebConfig.java:WebConfig",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:src/main/java/com/luqiang/seckill/interceptor/RateLimiterInterceptor.java",
+      "target": "class:src/main/java/com/luqiang/seckill/interceptor/RateLimiterInterceptor.java:RateLimiterInterceptor",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:src/main/java/com/luqiang/seckill/interceptor/RateLimiterInterceptor.java",
+      "target": "function:src/main/java/com/luqiang/seckill/interceptor/RateLimiterInterceptor.java:preHandle",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "function:src/main/java/com/luqiang/seckill/interceptor/RateLimiterInterceptor.java:preHandle",
+      "target": "function:src/main/java/com/luqiang/seckill/common/TokenBucketRateLimiter.java:tryAcquire",
+      "type": "calls",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "service:docker-compose.yml",
+      "target": "service:Dockerfile",
+      "type": "depends_on",
+      "direction": "forward",
+      "weight": 0.6
+    },
+    {
+      "source": "service:docker-compose.yml",
+      "target": "file:src/main/java/com/luqiang/seckill/SeckillSystemApplication.java",
+      "type": "deploys",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "service:Dockerfile",
+      "target": "file:src/main/java/com/luqiang/seckill/SeckillSystemApplication.java",
+      "type": "deploys",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "document:README.md",
+      "target": "config:pom.xml",
+      "type": "documents",
+      "direction": "forward",
+      "weight": 0.5
+    },
+    {
+      "source": "file:mvnw.cmd",
+      "target": "config:pom.xml",
+      "type": "depends_on",
+      "direction": "forward",
+      "weight": 0.6
+    },
+    {
+      "source": "document:docs/agents/domain.md",
+      "target": "document:docs/agents/issue-tracker.md",
+      "type": "related",
+      "direction": "forward",
+      "weight": 0.5
+    },
+    {
+      "source": "document:docs/agents/domain.md",
+      "target": "document:docs/agents/triage-labels.md",
+      "type": "related",
+      "direction": "forward",
+      "weight": 0.5
+    },
+    {
+      "source": "document:docs/agents/issue-tracker.md",
+      "target": "document:docs/agents/triage-labels.md",
+      "type": "related",
+      "direction": "forward",
+      "weight": 0.5
+    },
+    {
+      "source": "config:src/main/resources/application.yml",
+      "target": "file:src/main/java/com/luqiang/seckill/SeckillSystemApplication.java",
+      "type": "configures",
+      "direction": "forward",
+      "weight": 0.6
+    },
+    {
+      "source": "config:src/main/resources/application-docker.yml",
+      "target": "config:src/main/resources/application.yml",
+      "type": "depends_on",
+      "direction": "forward",
+      "weight": 0.6
+    },
+    {
+      "source": "config:src/main/resources/application-docker.yml",
+      "target": "file:src/main/java/com/luqiang/seckill/SeckillSystemApplication.java",
+      "type": "configures",
+      "direction": "forward",
+      "weight": 0.6
+    },
+    {
+      "source": "table:src/main/resources/schema.sql",
+      "target": "table:src/main/resources/schema.sql:seckill_goods",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "table:src/main/resources/schema.sql",
+      "target": "table:src/main/resources/schema.sql:seckill_order",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "table:src/main/resources/data.sql",
+      "target": "table:src/main/resources/schema.sql",
+      "type": "depends_on",
+      "direction": "forward",
+      "weight": 0.6
+    },
+    {
+      "source": "table:src/main/resources/schema.sql",
+      "target": "file:src/main/java/com/luqiang/seckill/entity/Goods.java",
+      "type": "defines_schema",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "table:src/main/resources/schema.sql",
+      "target": "file:src/main/java/com/luqiang/seckill/entity/OrderInfo.java",
+      "type": "defines_schema",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:src/main/java/com/luqiang/seckill/scheduler/OrderPersistScheduler.java",
+      "target": "file:src/main/java/com/luqiang/seckill/service/OrderQueueService.java",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/main/java/com/luqiang/seckill/common/GlobalExceptionHandler.java",
+      "target": "function:src/main/java/com/luqiang/seckill/common/GlobalExceptionHandler.java:handleConstraintViolation",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:src/main/java/com/luqiang/seckill/common/GlobalExceptionHandler.java",
+      "target": "function:src/main/java/com/luqiang/seckill/common/GlobalExceptionHandler.java:handleMethodArgumentNotValid",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:src/main/java/com/luqiang/seckill/common/GlobalExceptionHandler.java",
+      "target": "function:src/main/java/com/luqiang/seckill/common/GlobalExceptionHandler.java:handleException",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:src/main/java/com/luqiang/seckill/common/GlobalExceptionHandler.java",
+      "target": "class:src/main/java/com/luqiang/seckill/common/GlobalExceptionHandler.java:GlobalExceptionHandler",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:src/main/java/com/luqiang/seckill/config/RedisConfig.java",
+      "target": "function:src/main/java/com/luqiang/seckill/config/RedisConfig.java:lettuceCustomizer",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:src/main/java/com/luqiang/seckill/config/RedisConfig.java",
+      "target": "class:src/main/java/com/luqiang/seckill/config/RedisConfig.java:RedisConfig",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:src/main/java/com/luqiang/seckill/scheduler/OrderPersistScheduler.java",
+      "target": "function:src/main/java/com/luqiang/seckill/scheduler/OrderPersistScheduler.java:OrderPersistScheduler",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:src/main/java/com/luqiang/seckill/scheduler/OrderPersistScheduler.java",
+      "target": "function:src/main/java/com/luqiang/seckill/scheduler/OrderPersistScheduler.java:consumeQueue",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:src/main/java/com/luqiang/seckill/scheduler/OrderPersistScheduler.java",
+      "target": "class:src/main/java/com/luqiang/seckill/scheduler/OrderPersistScheduler.java:OrderPersistScheduler",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:src/main/java/com/luqiang/seckill/service/OrderQueueService.java",
+      "target": "function:src/main/java/com/luqiang/seckill/service/OrderQueueService.java:OrderQueueService",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:src/main/java/com/luqiang/seckill/service/OrderQueueService.java",
+      "target": "function:src/main/java/com/luqiang/seckill/service/OrderQueueService.java:enqueue",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:src/main/java/com/luqiang/seckill/service/OrderQueueService.java",
+      "target": "function:src/main/java/com/luqiang/seckill/service/OrderQueueService.java:dequeueBatch",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:src/main/java/com/luqiang/seckill/service/OrderQueueService.java",
+      "target": "function:src/main/java/com/luqiang/seckill/service/OrderQueueService.java:enqueueRaw",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:src/main/java/com/luqiang/seckill/service/OrderQueueService.java",
+      "target": "function:src/main/java/com/luqiang/seckill/service/OrderQueueService.java:queueSize",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:src/main/java/com/luqiang/seckill/service/OrderQueueService.java",
+      "target": "class:src/main/java/com/luqiang/seckill/service/OrderQueueService.java:OrderQueueService",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:docker/mysql/init.sql",
+      "target": "table:docker/mysql/init.sql:goods",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:docker/mysql/init.sql",
+      "target": "table:docker/mysql/init.sql:seckill_order",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:mvnw",
+      "target": "function:mvnw:set_java_home",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:src/main/java/com/luqiang/seckill/common/GlobalExceptionHandler.java",
+      "target": "function:src/main/java/com/luqiang/seckill/common/GlobalExceptionHandler.java:handleConstraintViolation",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:src/main/java/com/luqiang/seckill/common/GlobalExceptionHandler.java",
+      "target": "function:src/main/java/com/luqiang/seckill/common/GlobalExceptionHandler.java:handleMethodArgumentNotValid",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:src/main/java/com/luqiang/seckill/common/GlobalExceptionHandler.java",
+      "target": "function:src/main/java/com/luqiang/seckill/common/GlobalExceptionHandler.java:handleException",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:src/main/java/com/luqiang/seckill/common/GlobalExceptionHandler.java",
+      "target": "class:src/main/java/com/luqiang/seckill/common/GlobalExceptionHandler.java:GlobalExceptionHandler",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:src/main/java/com/luqiang/seckill/config/RedisConfig.java",
+      "target": "function:src/main/java/com/luqiang/seckill/config/RedisConfig.java:lettuceCustomizer",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:src/main/java/com/luqiang/seckill/config/RedisConfig.java",
+      "target": "class:src/main/java/com/luqiang/seckill/config/RedisConfig.java:RedisConfig",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:src/main/java/com/luqiang/seckill/scheduler/OrderPersistScheduler.java",
+      "target": "function:src/main/java/com/luqiang/seckill/scheduler/OrderPersistScheduler.java:OrderPersistScheduler",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:src/main/java/com/luqiang/seckill/scheduler/OrderPersistScheduler.java",
+      "target": "function:src/main/java/com/luqiang/seckill/scheduler/OrderPersistScheduler.java:consumeQueue",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:src/main/java/com/luqiang/seckill/scheduler/OrderPersistScheduler.java",
+      "target": "class:src/main/java/com/luqiang/seckill/scheduler/OrderPersistScheduler.java:OrderPersistScheduler",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:src/main/java/com/luqiang/seckill/service/OrderQueueService.java",
+      "target": "function:src/main/java/com/luqiang/seckill/service/OrderQueueService.java:OrderQueueService",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:src/main/java/com/luqiang/seckill/service/OrderQueueService.java",
+      "target": "function:src/main/java/com/luqiang/seckill/service/OrderQueueService.java:enqueue",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:src/main/java/com/luqiang/seckill/service/OrderQueueService.java",
+      "target": "function:src/main/java/com/luqiang/seckill/service/OrderQueueService.java:dequeueBatch",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:src/main/java/com/luqiang/seckill/service/OrderQueueService.java",
+      "target": "function:src/main/java/com/luqiang/seckill/service/OrderQueueService.java:enqueueRaw",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:src/main/java/com/luqiang/seckill/service/OrderQueueService.java",
+      "target": "function:src/main/java/com/luqiang/seckill/service/OrderQueueService.java:queueSize",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:src/main/java/com/luqiang/seckill/service/OrderQueueService.java",
+      "target": "class:src/main/java/com/luqiang/seckill/service/OrderQueueService.java:OrderQueueService",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "function:src/main/java/com/luqiang/seckill/scheduler/OrderPersistScheduler.java:consumeQueue",
+      "target": "function:src/main/java/com/luqiang/seckill/service/OrderQueueService.java:dequeueBatch",
+      "type": "calls",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "function:src/main/java/com/luqiang/seckill/scheduler/OrderPersistScheduler.java:consumeQueue",
+      "target": "function:src/main/java/com/luqiang/seckill/service/OrderQueueService.java:enqueueRaw",
+      "type": "calls",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "table:docker/mysql/init.sql:seckill_order",
+      "target": "file:src/main/java/com/luqiang/seckill/scheduler/OrderPersistScheduler.java",
+      "type": "defines_schema",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "config:.mvn/wrapper/maven-wrapper.properties",
+      "target": "file:mvnw",
+      "type": "configures",
+      "direction": "forward",
+      "weight": 0.6
+    },
+    {
+      "source": "file:config/redis.conf",
+      "target": "file:src/main/java/com/luqiang/seckill/config/RedisConfig.java",
+      "type": "related",
+      "direction": "forward",
+      "weight": 0.5
+    },
+    {
+      "source": "file:config/redis.conf",
+      "target": "file:src/main/java/com/luqiang/seckill/service/OrderQueueService.java",
+      "type": "related",
+      "direction": "forward",
+      "weight": 0.5
+    },
+    {
+      "source": "file:config/sentinel.conf",
+      "target": "file:config/redis.conf",
+      "type": "related",
+      "direction": "forward",
+      "weight": 0.5
+    },
+    {
+      "source": "document:docs/adr/stress-test-pipeline-2026-05-18.md",
+      "target": "file:src/main/java/com/luqiang/seckill/service/OrderQueueService.java",
+      "type": "documents",
+      "direction": "forward",
+      "weight": 0.5
+    },
+    {
+      "source": "document:docs/adr/stress-test-pipeline-2026-05-18.md",
+      "target": "file:src/main/java/com/luqiang/seckill/scheduler/OrderPersistScheduler.java",
+      "type": "documents",
+      "direction": "forward",
+      "weight": 0.5
+    },
+    {
+      "source": "document:docs/load-test-report.md",
+      "target": "file:jmeter/seckill-stress-test.jmx",
+      "type": "documents",
+      "direction": "forward",
+      "weight": 0.5
+    },
+    {
+      "source": "document:docs/load-test-report.md",
+      "target": "file:jmeter/seckill-pure-test.jmx",
+      "type": "documents",
+      "direction": "forward",
+      "weight": 0.5
+    },
+    {
+      "source": "document:docs/adr/stress-test-qps-2026-05-14.md",
+      "target": "document:docs/adr/stress-test-pipeline-2026-05-18.md",
+      "type": "related",
+      "direction": "forward",
+      "weight": 0.5
+    },
+    {
+      "source": "document:docs/adr/stress-test-qps-2026-05-14.md",
+      "target": "document:docs/load-test-report.md",
+      "type": "related",
+      "direction": "forward",
+      "weight": 0.5
+    },
+    {
+      "source": "document:docs/adr/stress-test-pipeline-2026-05-18.md",
+      "target": "document:docs/load-test-report.md",
+      "type": "related",
+      "direction": "forward",
+      "weight": 0.5
+    },
+    {
+      "source": "file:src/main/java/com/luqiang/seckill/SeckillSystemApplication.java",
+      "target": "file:src/test/java/com/luqiang/seckill/SeckillSystemApplicationTests.java",
+      "type": "tested_by",
+      "direction": "forward",
+      "weight": 0.5,
+      "description": "Path-based pairing (deterministic)"
+    }
+  ],
+  "layers": [
+    {
+      "id": "layer:api",
+      "name": "API Layer",
+      "description": "REST controllers exposing HTTP endpoints for authentication, goods listing, and flash-sale execution, plus static frontend pages served by the application",
+      "nodeIds": [
+        "file:src/main/java/com/luqiang/seckill/controller/AuthController.java",
+        "file:src/main/java/com/luqiang/seckill/controller/GoodsController.java",
+        "file:src/main/java/com/luqiang/seckill/controller/SeckillController.java",
+        "file:src/main/resources/static/dashboard.html",
+        "file:src/main/resources/static/seckill.html"
+      ]
+    },
+    {
+      "id": "layer:service",
+      "name": "Service Layer",
+      "description": "Core business logic for flash-sale order execution, inventory deduction, order queuing, delayed cancellation, and persistence scheduling, along with the Spring Boot application entry point that wires all services together",
+      "nodeIds": [
+        "file:src/main/java/com/luqiang/seckill/SeckillSystemApplication.java",
+        "file:src/main/java/com/luqiang/seckill/service/GoodsService.java",
+        "file:src/main/java/com/luqiang/seckill/service/SeckillService.java",
+        "file:src/main/java/com/luqiang/seckill/service/OrderQueueService.java",
+        "file:src/main/java/com/luqiang/seckill/service/impl/GoodsServiceImpl.java",
+        "file:src/main/java/com/luqiang/seckill/service/impl/SeckillServiceImpl.java",
+        "file:src/main/java/com/luqiang/seckill/scheduler/OrderCancelScheduler.java",
+        "file:src/main/java/com/luqiang/seckill/scheduler/OrderPersistScheduler.java"
+      ]
+    },
+    {
+      "id": "layer:data",
+      "name": "Data Layer",
+      "description": "JPA entities, Spring Data repositories, MyBatis mappers, and SQL schema definitions for the goods and seckill_order tables including initialization scripts",
+      "nodeIds": [
+        "file:src/main/java/com/luqiang/seckill/entity/Goods.java",
+        "file:src/main/java/com/luqiang/seckill/entity/OrderInfo.java",
+        "file:src/main/java/com/luqiang/seckill/mapper/GoodsMapper.java",
+        "file:src/main/java/com/luqiang/seckill/repository/GoodsRepository.java",
+        "file:src/main/java/com/luqiang/seckill/repository/OrderInfoRepository.java",
+        "table:src/main/resources/schema.sql",
+        "table:src/main/resources/schema.sql:seckill_goods",
+        "table:src/main/resources/schema.sql:seckill_order",
+        "table:src/main/resources/data.sql",
+        "file:docker/mysql/init.sql",
+        "table:docker/mysql/init.sql:goods",
+        "table:docker/mysql/init.sql:seckill_order"
+      ]
+    },
+    {
+      "id": "layer:common",
+      "name": "Common Layer",
+      "description": "Shared cross-cutting utilities including API response envelope, bloom filter, cache constants, JWT auth helper, local stock cache, Redis client wrapper, token-bucket rate limiter, global exception handler, HTTP interceptors for JWT and rate limiting, and Spring configuration beans for Redis and Web MVC",
+      "nodeIds": [
+        "file:src/main/java/com/luqiang/seckill/common/ApiResponse.java",
+        "file:src/main/java/com/luqiang/seckill/common/BloomFilter.java",
+        "file:src/main/java/com/luqiang/seckill/common/CacheConstants.java",
+        "file:src/main/java/com/luqiang/seckill/common/GlobalExceptionHandler.java",
+        "file:src/main/java/com/luqiang/seckill/common/JwtUtil.java",
+        "file:src/main/java/com/luqiang/seckill/common/LocalStockCache.java",
+        "file:src/main/java/com/luqiang/seckill/common/RedisUtil.java",
+        "file:src/main/java/com/luqiang/seckill/common/TokenBucketRateLimiter.java",
+        "file:src/main/java/com/luqiang/seckill/interceptor/JwtAuthInterceptor.java",
+        "file:src/main/java/com/luqiang/seckill/interceptor/RateLimiterInterceptor.java",
+        "file:src/main/java/com/luqiang/seckill/config/RedisConfig.java",
+        "file:src/main/java/com/luqiang/seckill/config/WebConfig.java"
+      ]
+    },
+    {
+      "id": "layer:infrastructure",
+      "name": "Infrastructure Layer",
+      "description": "Containerization with Docker and Docker Compose, Redis Sentinel high-availability configuration, and Sentinel cluster entrypoint script for deploying the flash-sale system",
+      "nodeIds": [
+        "service:Dockerfile",
+        "service:docker-compose.yml",
+        "file:config/redis.conf",
+        "file:config/sentinel.conf",
+        "file:config/sentinel-entrypoint.sh"
+      ]
+    },
+    {
+      "id": "layer:configuration",
+      "name": "Configuration Layer",
+      "description": "Maven build configuration, Spring Boot application properties for development and Docker environments, build wrapper scripts, and project-level settings files",
+      "nodeIds": [
+        "config:pom.xml",
+        "config:.mvn/wrapper/maven-wrapper.properties",
+        "config:src/main/resources/application.yml",
+        "config:src/main/resources/application-docker.yml",
+        "file:mvnw",
+        "file:mvnw.cmd",
+        "file:.gitattributes",
+        "file:.understand-anything/.understandignore"
+      ]
+    },
+    {
+      "id": "layer:documentation",
+      "name": "Documentation Layer",
+      "description": "Project README, Claude Code behavioral guidelines, architecture decision records (ADR) for stress-test optimizations, agent skill documentation, load test report, and JMeter dashboard HTML report",
+      "nodeIds": [
+        "document:README.md",
+        "document:CLAUDE.md",
+        "document:docs/agents/domain.md",
+        "document:docs/agents/issue-tracker.md",
+        "document:docs/agents/triage-labels.md",
+        "document:docs/adr/stress-test-pipeline-2026-05-18.md",
+        "document:docs/adr/stress-test-qps-2026-05-14.md",
+        "document:docs/load-test-report.md",
+        "file:jmeter/dashboard.html"
+      ]
+    },
+    {
+      "id": "layer:test",
+      "name": "Test Layer",
+      "description": "Spring Boot smoke tests confirming application context loads, placeholder test class, and JMeter stress test plans for measuring flash-sale throughput under high concurrency",
+      "nodeIds": [
+        "file:src/test/java/com/luqiang/seckill/SeckillSystemApplicationTests.java",
+        "file:src/test/java/SeckillSystemApplication.java",
+        "file:jmeter/seckill-pure-test.jmx",
+        "file:jmeter/seckill-stress-test.jmx"
+      ]
+    }
+  ],
+  "tour": [
+    {
+      "order": 1,
+      "title": "项目概览",
+      "description": "从 README.md 开始，了解这个高并发秒杀系统的整体架构和核心设计理念。文档描述了从 3000+ 并发用户到 MySQL 的完整请求链路，包括库存分段、CAS 本地扣减、Redis Pipeline、削峰队列批量落库等关键模式，以及 370.9 QPS 的压测成果。这为后续每个组件的深入理解提供了路线图。",
+      "nodeIds": [
+        "document:README.md"
+      ]
+    },
+    {
+      "order": 2,
+      "title": "应用入口与配置",
+      "description": "SeckillSystemApplication 是 Spring Boot 应用的启动入口，使用 @MapperScan 扫描 MyBatis 映射器并通过 @EnableScheduling 启用定时任务。启动时运行两个 CommandLineRunner：checkDatabase 验证 MySQL 连通性，initStock 从数据库加载商品列表并初始化 Redis 分段库存。application.yml 定义了关键的线程池调优参数——Tomcat 最大 500 线程、HikariCP 最大 30 连接、Redis Lettuce 最大 100 连接——这些是支撑高并发的基石。",
+      "nodeIds": [
+        "file:src/main/java/com/luqiang/seckill/SeckillSystemApplication.java",
+        "config:src/main/resources/application.yml"
+      ],
+      "languageLesson": "Spring Boot @EnableScheduling 配合 @Scheduled 注解开启定时任务线程池。application.yml 中的 spring.task.scheduling.pool.size=4 控制并行执行槽位，避免定时任务阻塞主业务线程。"
+    },
+    {
+      "order": 3,
+      "title": "数据模型与数据库架构",
+      "description": "Goods 和 OrderInfo 是系统的两个核心 JPA 实体，映射到 schema.sql 中定义的 seckill_goods 和 seckill_order 表。Goods 实体包含商品的 id、name、price 和 stock 字段；OrderInfo 记录每次秒杀订单，包含 goodsId、userId、createTime 和三态 status（pending、paid、cancelled）。schema.sql 在 (goods_id, user_id) 上建立了唯一约束，防止同一用户重复购买同一商品——这在数据库层面保证了业务规则。",
+      "nodeIds": [
+        "file:src/main/java/com/luqiang/seckill/entity/Goods.java",
+        "file:src/main/java/com/luqiang/seckill/entity/OrderInfo.java",
+        "table:src/main/resources/schema.sql"
+      ],
+      "languageLesson": "JPA 实体使用 jakarta.persistence 注解，配合 @GeneratedValue(strategy = IDENTITY) 利用 MySQL 自增主键。数据初始化通过 data.sql 在开发环境插入一条 stock=100 的测试商品。"
+    },
+    {
+      "order": 4,
+      "title": "REST API 层",
+      "description": "SeckillController 和 GoodsController 暴露了系统对外的 HTTP 接口。SeckillController 提供三个端点：POST /seckill/do/{id} 执行秒杀、GET /seckill/stock/{id} 查询库存、GET /seckill/result/{id} 轮询订单结果。GoodsController 提供 /goods/list 返回商品列表。所有控制器统一使用 ApiResponse 记录作为响应封装，ApiResponse 使用 Java 16+ 的 record 语法定义了 code、message、data 三个字段，配合静态工厂方法 success() 和 failure() 确保响应格式一致。",
+      "nodeIds": [
+        "file:src/main/java/com/luqiang/seckill/controller/SeckillController.java",
+        "file:src/main/java/com/luqiang/seckill/controller/GoodsController.java",
+        "file:src/main/java/com/luqiang/seckill/common/ApiResponse.java"
+      ],
+      "languageLesson": "Java record 提供不可变数据传输对象，自动生成 constructor、equals、hashCode、toString。搭配 static factory method 提供命名良好的构造方式，比直接调用 new 更语义化。"
+    },
+    {
+      "order": 5,
+      "title": "核心秒杀服务",
+      "description": "SeckillService 接口定义了秒杀业务的契约，SeckillServiceImpl 是其核心实现，也是项目中最复杂的类（fan-out 最高，依赖 9 个模块）。executeSeckill 方法实现了四阶段流程：Bloom 过滤器非法商品校验 -> 已售罄快速路径拦截 -> 分段本地 CAS 库存扣减 -> Redis Pipeline 批量执行 SADD（去重）+ LPUSH（入队）+ EXPIRE（TTL）。这种设计将一次秒杀请求的 Redis 网络开销从多次 RTT 压缩到一次 Pipeline RTT，是达到 370 QPS 的关键优化。",
+      "nodeIds": [
+        "file:src/main/java/com/luqiang/seckill/service/SeckillService.java",
+        "file:src/main/java/com/luqiang/seckill/service/impl/SeckillServiceImpl.java"
+      ],
+      "languageLesson": "Redis Pipeline 将多个命令打包在一次网络往返中发送，减少 RTT 开销。与事务不同，Pipeline 不保证原子性，但在秒杀场景中每个命令本身是原子的（SADD 去重、LPUSH 入队），Pipeline 只负责减少网络延迟。"
+    },
+    {
+      "order": 6,
+      "title": "本地库存缓存与性能优化",
+      "description": "LocalStockCache 是系统的性能核心，使用 ConcurrentHashMap 结合 AtomicLong 实现分段 CAS 无锁本地库存扣减。库存被分割为 10 个 Redis 段，每个段独立计数，扣减时轮询各段。本地库存耗尽时通过分布式锁从 Redis 批量补充（acquire 方法的 restock 逻辑）。BloomFilter 基于 Redis Bitmap 实现 K=7 哈希函数的布隆过滤器，在商品查询前进行存在性校验，防止缓存穿透。CacheConstants 统一管理所有 Redis key 模板和 TTL 常量，确保 key 命名一致。",
+      "nodeIds": [
+        "file:src/main/java/com/luqiang/seckill/common/LocalStockCache.java",
+        "file:src/main/java/com/luqiang/seckill/common/BloomFilter.java",
+        "file:src/main/java/com/luqiang/seckill/common/CacheConstants.java"
+      ],
+      "languageLesson": "CAS (Compare-And-Swap) 通过 AtomicLong 的 compareAndSet 实现无锁并发。LocalStockCache 使用 while(!atomic.compareAndSet(expected, newValue)) 自旋，避免 synchronized 的上下文切换开销，在低冲突场景下性能远优于悲观锁。"
+    },
+    {
+      "order": 7,
+      "title": "订单持久化流水线",
+      "description": "秒杀订单不直接写入 MySQL，而是经过一条削峰流水线。OrderQueueService 封装了基于 Redis List 的 FIFO 队列，使用预注册的 Lua 脚本实现原子性的 LRANGE + LTRIM 批量出队操作。OrderPersistScheduler 每 200ms 从队列中拉取最多 200 条订单，通过 JDBC batchUpdate 执行批量插入，失败时重新入队保证数据不丢失。OrderCancelScheduler 每 3 秒轮询 Redis ZSET 中过期未支付的订单，执行取消操作并恢复 Redis 库存状态。这套流水线将数据库写压力从峰值并发削平为稳定的批量写入。",
+      "nodeIds": [
+        "file:src/main/java/com/luqiang/seckill/service/OrderQueueService.java",
+        "file:src/main/java/com/luqiang/seckill/scheduler/OrderPersistScheduler.java",
+        "file:src/main/java/com/luqiang/seckill/scheduler/OrderCancelScheduler.java"
+      ],
+      "languageLesson": "Lua 脚本在 Redis 中原子执行，保证 LRANGE（读取）和 LTRIM（截断）之间的线程安全性，避免并发出队时出现数据竞争。使用 DefaultRedisScript 预注册脚本避免每次调用重新传输脚本内容。"
+    },
+    {
+      "order": 8,
+      "title": "容器化与部署架构",
+      "description": "Dockerfile 基于 Eclipse Temurin 17 JRE 构建生产镜像，暴露 8080 端口并激活 docker Spring profile。docker-compose.yml 编排了整个系统：MySQL 8.0 数据库、Redis Sentinel 集群（1 主 1 从 3 哨兵）、以及 Spring Boot 应用服务，配置了健康检查、依赖启动顺序和持久化数据卷。Redis 配置文件（redis.conf）启用 RDB + AOF 混合持久化，在性能和数据安全之间取得平衡。Sentinel 配置实现了 3 节点仲裁的高可用故障转移。",
+      "nodeIds": [
+        "service:Dockerfile",
+        "service:docker-compose.yml",
+        "file:config/redis.conf"
+      ],
+      "languageLesson": "Docker Compose 的 depends_on 仅控制容器启动顺序，不保证服务就绪。实际依赖需要配合 healthcheck 轮询（如 MySQL 的 mysqladmin ping 和 Redis 的 PING 命令）。Sentinel 的 quorum=2 意味着至少 2 个哨兵同意才能触发故障转移，防止网络分区导致误判。"
+    }
+  ]
+}
