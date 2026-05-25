@@ -87,7 +87,7 @@
 | 落库速度 | 150/s | ~1000/s | **6.7×** |
 | 错误率 | 0 | 0 | 一致 |
 
-**当前瓶颈：** 库存耗尽后失败请求遍历全部 10 段做无效 Redis 往返，P0 方案为添加 `soldout` 标记位短路。
+**已优化：** 库存耗尽后设置 `soldout` 标记位，后续请求直接短路返回，无需遍历分段。
 
 详见 [`docs/adr/stress-test-qps-2026-05-14.md`](docs/adr/stress-test-qps-2026-05-14.md) 和 [`docs/adr/stress-test-pipeline-2026-05-18.md`](docs/adr/stress-test-pipeline-2026-05-18.md)。
 
@@ -129,9 +129,20 @@ redisTemplate.executePipelined((RedisCallback<Object>) conn -> {
 
 入队失败时执行补偿 Lua 脚本 `INCR` 回补库存 + `SREM` 移除用户，保证不超卖、不丢单。
 
-### Soldout 标记（规划中）
+### Soldout 全局标记位
 
-库存全局归零后在 Redis 设置 `soldout` 标记位，后续请求直接返回「已售罄」，消除库存耗尽后 10 段无效扫描。
+库存全局归零后在 Redis 设置 `{s:<goodsId>}:soldout` 标记位（TTL 1h），后续请求在布隆过滤器之后、分段遍历之前直接短路返回「已售罄」，消除库存耗尽后 10 段无效 Redis 往返。库存回补时自动清除标记。
+
+```java
+// SeckillServiceImpl: 卖光时设标记
+redisTemplate.opsForValue().set(
+    soldOutKey(goodsId), "1", SOLDOUT_TTL_SECONDS, TimeUnit.SECONDS);
+
+// 请求入口短路检查（遍历分段之前）
+if (Boolean.TRUE.equals(redisTemplate.hasKey(soldOutKey(goodsId)))) {
+    return ApiResponse.fail(0, "库存不足");
+}
+```
 
 ### 缓存策略
 
