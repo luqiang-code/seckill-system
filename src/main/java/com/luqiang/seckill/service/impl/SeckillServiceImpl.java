@@ -90,7 +90,9 @@ public class SeckillServiceImpl implements SeckillService {
                 continue;
             }
 
-            // Phase 2+3: Pipeline SADD + EXPIRE + LPUSH + EXPIRE → 1 RTT instead of 4
+            // Phase 2+3: Pipeline SADD + EXPIRE + LPUSH + EXPIRE + ZADD → 1 RTT
+            long expireAt = System.currentTimeMillis() + CacheConstants.CANCEL_DELAY_MS;
+            String cancelMember = goodsId + ":" + userId + ":" + currentSeg;
             @SuppressWarnings({"unchecked", "rawtypes"})
             List<Object> pipeResults = redisTemplate.executePipelined(
                     new SessionCallback<Object>() {
@@ -100,6 +102,7 @@ public class SeckillServiceImpl implements SeckillService {
                             operations.expire(orderKey, 7200, TimeUnit.SECONDS);
                             operations.opsForList().leftPush("order:queue", goodsId + ":" + userId);
                             operations.expire("order:queue", 600, TimeUnit.SECONDS);
+                            operations.opsForZSet().add(CacheConstants.CANCEL_ZSET_KEY, cancelMember, expireAt);
                             return null;
                         }
                     });
@@ -107,7 +110,7 @@ public class SeckillServiceImpl implements SeckillService {
             // Check SADD result
             Long added = (Long) pipeResults.get(0);
             if (added != null && added == 0) {
-                // Already LPUSH'd — remove from queue
+                redisTemplate.opsForZSet().remove(CacheConstants.CANCEL_ZSET_KEY, cancelMember);
                 redisTemplate.opsForList().remove("order:queue", 1, goodsId + ":" + userId);
                 localStockCache.rollback(stockKey);
                 return ApiResponse.fail(2, "你已经抢过了");
@@ -116,14 +119,11 @@ public class SeckillServiceImpl implements SeckillService {
             // Check LPUSH result
             Object lpushResult = pipeResults.get(2);
             if (lpushResult == null) {
+                redisTemplate.opsForZSet().remove(CacheConstants.CANCEL_ZSET_KEY, cancelMember);
                 redisTemplate.opsForSet().remove(orderKey, userId);
                 localStockCache.rollback(stockKey);
                 return ApiResponse.fail(-4, "下单失败,请重试");
             }
-            // 加入延迟取消队列
-            long expireAt = System.currentTimeMillis() + CacheConstants.CANCEL_DELAY_MS;
-            String cancelMember = goodsId + ":" + userId + ":" + currentSeg;
-            redisTemplate.opsForZSet().add(CacheConstants.CANCEL_ZSET_KEY, cancelMember, expireAt);
             return ApiResponse.success("秒杀成功", null);
         }
 
