@@ -1,0 +1,215 @@
+<script setup lang="ts">
+import { ref } from 'vue'
+import { doSeckill, fetchResult, ApiError } from '../api'
+import type { Goods } from '../api/types'
+
+const props = defineProps<{
+  goods: Goods
+  disabled: boolean
+  userId: string
+}>()
+
+const emit = defineEmits<{
+  sold: []
+}>()
+
+const DEBOUNCE_MS = 1000
+
+const resultType = ref<'success' | 'fail' | 'info' | ''>('')
+const resultMsg = ref('')
+let cooldownUntil = 0
+
+async function handleSeckill() {
+  const now = Date.now()
+  if (now < cooldownUntil) return
+  cooldownUntil = now + DEBOUNCE_MS
+
+  clearResult()
+
+  try {
+    await doSeckill(props.goods.id, props.userId)
+    resultType.value = 'success'
+    resultMsg.value = '抢到了！'
+    pollResult()
+    emit('sold')
+  } catch (e) {
+    if (e instanceof ApiError) {
+      switch (e.code) {
+        case 429:
+          resultType.value = 'info'
+          resultMsg.value = '请求太频繁'
+          break
+        case 2:
+          resultType.value = 'info'
+          resultMsg.value = '已抢过'
+          break
+        case 0:
+          resultType.value = 'fail'
+          resultMsg.value = '已售罄'
+          break
+        default:
+          resultType.value = 'fail'
+          resultMsg.value = e.message
+      }
+    } else {
+      resultType.value = 'fail'
+      resultMsg.value = '网络错误'
+    }
+  }
+}
+
+function pollResult() {
+  const check = () => {
+    fetchResult(props.goods.id, props.userId)
+      .then(order => {
+        resultType.value = 'success'
+        resultMsg.value = '订单号: ' + order.id
+      })
+      .catch(err => {
+        if (err instanceof ApiError && err.code === 3) {
+          setTimeout(check, 500)
+        }
+      })
+  }
+  setTimeout(check, 300)
+}
+
+function clearResult() {
+  resultType.value = ''
+  resultMsg.value = ''
+}
+</script>
+
+<template>
+  <div class="goods-card">
+    <div class="icon" :class="goods.id === 1 ? 'phone' : 'laptop'">
+      {{ goods.id === 1 ? '📱' : '💻' }}
+    </div>
+    <div class="info">
+      <div class="name">{{ goods.name }}</div>
+      <div class="price"><span class="unit">¥</span>{{ goods.price.toLocaleString() }}</div>
+      <div class="stock-info">
+        剩余库存 <span class="num">{{ goods.stock }}</span> 件
+      </div>
+    </div>
+    <div class="action">
+      <button
+        class="btn"
+        :disabled="disabled"
+        @click="handleSeckill"
+      >{{ disabled ? '等待开场' : '立即秒杀' }}</button>
+      <div v-if="resultType" class="result" :class="resultType">{{ resultMsg }}</div>
+    </div>
+  </div>
+</template>
+
+<style scoped>
+.goods-card {
+  background: #fff;
+  border-radius: 12px;
+  padding: 24px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+  display: flex;
+  align-items: center;
+  gap: 20px;
+}
+
+.icon {
+  width: 64px;
+  height: 64px;
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 30px;
+  flex-shrink: 0;
+}
+
+.icon.phone { background: #e8f5e9; }
+.icon.laptop { background: #e3f2fd; }
+
+.info {
+  flex: 1;
+  min-width: 0;
+}
+
+.name {
+  font-size: 18px;
+  font-weight: 600;
+  color: #333;
+  margin-bottom: 4px;
+}
+
+.price {
+  font-size: 22px;
+  font-weight: 700;
+  color: #e74c3c;
+  margin-bottom: 2px;
+}
+
+.price .unit {
+  font-size: 14px;
+}
+
+.stock-info {
+  font-size: 13px;
+  color: #999;
+}
+
+.stock-info .num {
+  color: #e74c3c;
+  font-weight: 600;
+}
+
+.action {
+  flex-shrink: 0;
+}
+
+.btn {
+  width: 120px;
+  padding: 12px 0;
+  border: none;
+  border-radius: 8px;
+  font-size: 16px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.15s;
+  color: #fff;
+  background: #e74c3c;
+}
+
+.btn:active:not(:disabled) {
+  transform: scale(0.96);
+}
+
+.btn:disabled {
+  background: #ccc;
+  cursor: not-allowed;
+}
+
+.result {
+  font-size: 13px;
+  margin-top: 6px;
+  text-align: center;
+  font-weight: 600;
+}
+
+.result.success { color: #27ae60; }
+.result.fail { color: #e74c3c; }
+.result.info { color: #2980b9; }
+
+@media (max-width: 500px) {
+  .goods-card {
+    flex-direction: column;
+    text-align: center;
+  }
+
+  .action {
+    width: 100%;
+  }
+
+  .btn {
+    width: 100%;
+  }
+}
+</style>
