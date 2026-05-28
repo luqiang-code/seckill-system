@@ -1,16 +1,23 @@
 <script setup lang="ts">
-import { ref } from 'vue'
-import { useRouter } from 'vue-router'
+import { ref, computed } from 'vue'
+import { useRouter, useRoute } from 'vue-router'
 import { usePasskey } from '../composables/usePasskey'
 import { useAuth } from '../composables/useAuth'
 
 const router = useRouter()
+const route = useRoute()
 const { registerPasskey, authenticateWithPasskey, authenticateDiscoverable } = usePasskey()
 const { login } = useAuth()
 
 const username = ref('')
 const message = ref('')
 const loading = ref(false)
+
+const notice = computed(() => {
+  if (route.query.reason === 'logout') return '已退出登录'
+  if (route.query.reason === 'auth') return '请先登录后下单'
+  return ''
+})
 
 function setError(msg: string) {
   message.value = msg
@@ -90,6 +97,7 @@ function handleEnter(e: KeyboardEvent) {
       <h1>秒杀系统</h1>
       <p class="subtitle">Passkey 通行密钥登录</p>
 
+      <p v-if="notice" class="notice-text">{{ notice }}</p>
       <div class="input-group">
         <input
           v-model="username"
@@ -149,7 +157,16 @@ h1 {
 
 .subtitle {
   color: #666;
-  margin: 8px 0 32px;
+  margin: 8px 0 16px;
+}
+
+.notice-text {
+  background: #fff3cd;
+  color: #856404;
+  padding: 10px 14px;
+  border-radius: 6px;
+  font-size: 14px;
+  margin-bottom: 16px;
 }
 
 .input-group {

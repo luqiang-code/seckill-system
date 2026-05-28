@@ -3,16 +3,23 @@ import CountdownBar from '../components/CountdownBar.vue'
 import GoodsGrid from '../components/GoodsGrid.vue'
 import { useCountdown } from '../composables/useCountdown'
 import { usePolling } from '../composables/usePolling'
+import { useRouter } from 'vue-router'
 import { useAuth } from '../composables/useAuth'
 import { fetchGoods } from '../api'
 import type { Goods } from '../api/types'
 
+const router = useRouter()
 const WINDOW_DURATION = 10
 const INTERVAL_DURATION = 25
 
 const { remaining, status, isWindowOpen } = useCountdown(WINDOW_DURATION, INTERVAL_DURATION)
 const { data: goodsList } = usePolling<Goods[]>(fetchGoods, 5000)
 const { username, logout } = useAuth()
+
+async function handleLogout() {
+  await logout()
+  router.push({ name: 'login', query: { reason: 'logout' } })
+}
 
 function onSold() {
   fetchGoods().then(list => {
@@ -32,7 +39,7 @@ function onSold() {
 
     <div class="user-bar">
       <span class="user-label">{{ username }}</span>
-      <button class="logout-btn" @click="logout">退出</button>
+      <button class="logout-btn" @click="handleLogout">退出</button>
     </div>
 
     <GoodsGrid
