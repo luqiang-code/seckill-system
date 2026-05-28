@@ -124,10 +124,12 @@ public class SeckillServiceImpl implements SeckillService {
                 localStockCache.rollback(stockKey);
                 return ApiResponse.fail(-4, "下单失败,请重试");
             }
+            redisTemplate.delete(CacheConstants.GOODS_LIST_KEY);
             return ApiResponse.success("秒杀成功", null);
         }
 
-        // 全部 segment 耗尽，设置售罄标记避免后续请求无效遍历
+        // 全部 segment 耗尽，删除商品列表缓存并设置售罄标记
+        redisTemplate.delete(CacheConstants.GOODS_LIST_KEY);
         redisTemplate.opsForValue().set(
                 CacheConstants.soldOutKey(goodsId), "1",
                 CacheConstants.SOLDOUT_TTL_SECONDS, TimeUnit.SECONDS);
