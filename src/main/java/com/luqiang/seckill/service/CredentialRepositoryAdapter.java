@@ -70,9 +70,12 @@ public class CredentialRepositoryAdapter implements com.yubico.webauthn.Credenti
 
     private RegisteredCredential toRegisteredCredential(Credential c) {
         try {
+            String username = userRepository.findById(c.getUserId())
+                    .map(u -> u.getUsername())
+                    .orElse(c.getUserId().toString());
             return RegisteredCredential.builder()
                     .credentialId(ByteArray.fromBase64Url(c.getCredentialId()))
-                    .userHandle(new ByteArray(c.getUserId().toString().getBytes(StandardCharsets.UTF_8)))
+                    .userHandle(new ByteArray(username.getBytes(StandardCharsets.UTF_8)))
                     .publicKeyCose(new ByteArray(c.getPublicKey()))
                     .signatureCount(c.getCounter())
                     .build();
