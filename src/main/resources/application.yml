@@ -53,3 +53,8 @@ spring:
 logging:
   level:
     root: info
+
+webauthn:
+  rp-id: localhost
+  rp-name: 秒杀系统
+  origin: http://localhost:5173
