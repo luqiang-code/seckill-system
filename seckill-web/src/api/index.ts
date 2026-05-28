@@ -1,4 +1,4 @@
-import type { ApiResponse, Goods, OrderInfo } from './types'
+import type { ApiResponse, AuthData, Goods, OrderInfo } from './types'
 
 class ApiError extends Error {
   code: number
@@ -8,13 +8,35 @@ class ApiError extends Error {
   }
 }
 
+function getToken(): string | null {
+  return localStorage.getItem('token')
+}
+
 async function request<T>(url: string, options?: RequestInit): Promise<T> {
-  const resp = await fetch(url, options)
-  const body: ApiResponse<T> = await resp.json()
+  const headers: Record<string, string> = {
+    'Content-Type': 'application/json',
+    ...(options?.headers as Record<string, string>),
+  }
+
+  const token = getToken()
+  if (token) {
+    headers['Authorization'] = `Bearer ${token}`
+  }
+
+  const resp = await fetch(url, { ...options, headers })
+
+  if (resp.status === 401) {
+    localStorage.removeItem('token')
+    localStorage.removeItem('username')
+    window.location.hash = '#/login'
+    throw new ApiError(401, '未登录')
+  }
 
   if (resp.status === 429) {
     throw new ApiError(429, '请求太频繁')
   }
+
+  const body: ApiResponse<T> = await resp.json()
 
   if (body.code === 1) {
     return body.data
@@ -23,20 +45,71 @@ async function request<T>(url: string, options?: RequestInit): Promise<T> {
   throw new ApiError(body.code || 0, body.message || '请求失败')
 }
 
+// ==================== Auth ====================
+
+export async function registerOptions(username: string): Promise<any> {
+  return request('/auth/register/options', {
+    method: 'POST',
+    body: JSON.stringify({ username }),
+  })
+}
+
+export async function registerVerify(username: string, registrationResponse: any): Promise<AuthData> {
+  return request('/auth/register/verify', {
+    method: 'POST',
+    body: JSON.stringify({ username, registrationResponse }),
+  })
+}
+
+export async function loginOptions(username: string): Promise<any> {
+  return request('/auth/login/options', {
+    method: 'POST',
+    body: JSON.stringify({ username }),
+  })
+}
+
+export async function loginVerify(username: string, authenticationResponse: any): Promise<AuthData> {
+  return request('/auth/login/verify', {
+    method: 'POST',
+    body: JSON.stringify({ username, authenticationResponse }),
+  })
+}
+
+export async function discoverOptions(): Promise<any> {
+  return request('/auth/discover', { method: 'POST' })
+}
+
+export async function discoverVerify(authenticationResponse: any): Promise<AuthData> {
+  return request('/auth/discover/verify', {
+    method: 'POST',
+    body: JSON.stringify({ authenticationResponse }),
+  })
+}
+
+export async function fetchCurrentUser(): Promise<{ userId: string }> {
+  return request('/auth/me')
+}
+
+export async function logout(): Promise<void> {
+  await request('/auth/logout', { method: 'POST' })
+}
+
+// ==================== Goods & Seckill ====================
+
 export function fetchGoods(): Promise<Goods[]> {
   return request<Goods[]>('/goods/list')
 }
 
-export function doSeckill(goodsId: number, userId: string): Promise<void> {
-  return request<void>(`/seckill/do/${goodsId}?userId=${encodeURIComponent(userId)}`, { method: 'POST' })
+export function doSeckill(goodsId: number): Promise<void> {
+  return request<void>(`/seckill/do/${goodsId}`, { method: 'POST' })
 }
 
 export function fetchStock(goodsId: number): Promise<number> {
   return request<number>(`/seckill/stock/${goodsId}`)
 }
 
-export function fetchResult(goodsId: number, userId: string): Promise<OrderInfo> {
-  return request<OrderInfo>(`/seckill/result/${goodsId}?userId=${encodeURIComponent(userId)}`)
+export function fetchResult(goodsId: number): Promise<OrderInfo> {
+  return request<OrderInfo>(`/seckill/result/${goodsId}`)
 }
 
 export { ApiError }

@@ -18,3 +18,10 @@ export interface ApiResponse<T> {
   message: string
   data: T
 }
+
+// WebAuthn types
+export interface AuthData {
+  token: string
+  username: string
+  userId?: string
+}
