@@ -1,5 +1,6 @@
 package com.luqiang.seckill.controller;
 
+import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.luqiang.seckill.common.ApiResponse;
 import com.luqiang.seckill.common.JwtUtil;
@@ -14,10 +15,23 @@ public class AuthController {
 
     private final WebAuthnService webAuthnService;
     private final ObjectMapper objectMapper;
+    private final ObjectMapper nonNullMapper;
 
     public AuthController(WebAuthnService webAuthnService, ObjectMapper objectMapper) {
         this.webAuthnService = webAuthnService;
         this.objectMapper = objectMapper;
+        this.nonNullMapper = objectMapper.copy()
+                .setSerializationInclusion(JsonInclude.Include.NON_NULL);
+    }
+
+    /** Strip null-valued fields from WebAuthn options that browsers reject. */
+    private Object stripNulls(Object obj) {
+        try {
+            String json = nonNullMapper.writeValueAsString(obj);
+            return objectMapper.readValue(json, Object.class);
+        } catch (Exception e) {
+            return obj;
+        }
     }
 
     // ==================== Registration ====================
@@ -29,7 +43,7 @@ public class AuthController {
             return ApiResponse.fail(400, "username required");
         }
         try {
-            return ApiResponse.success("ok", webAuthnService.startRegistration(username));
+            return ApiResponse.success("ok", stripNulls(webAuthnService.startRegistration(username)));
         } catch (WebAuthnService.UsernameAlreadyExistsException e) {
             return ApiResponse.fail(409, e.getMessage());
         }
@@ -64,7 +78,7 @@ public class AuthController {
         }
         try {
             return ApiResponse.success("ok",
-                    webAuthnService.startAssertion(username).getPublicKeyCredentialRequestOptions());
+                    stripNulls(webAuthnService.startAssertion(username).getPublicKeyCredentialRequestOptions()));
         } catch (WebAuthnService.NoPasskeyException e) {
             return ApiResponse.fail(400, e.getMessage());
         }
@@ -92,7 +106,7 @@ public class AuthController {
     @PostMapping("/discover")
     public ApiResponse<?> discoverOptions() {
         return ApiResponse.success("ok",
-                webAuthnService.startDiscoverAssertion().getPublicKeyCredentialRequestOptions());
+                stripNulls(webAuthnService.startDiscoverAssertion().getPublicKeyCredentialRequestOptions()));
     }
 
     @PostMapping("/discover/verify")
