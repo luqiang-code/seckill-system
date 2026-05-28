@@ -1,5 +1,7 @@
 import type { ApiResponse, AuthData, Goods, OrderInfo } from './types'
 
+export type { AuthData }
+
 class ApiError extends Error {
   code: number
   constructor(code: number, message: string) {
