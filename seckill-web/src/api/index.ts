@@ -94,6 +94,10 @@ export async function logout(): Promise<void> {
   await request('/auth/logout', { method: 'POST' })
 }
 
+export async function getTestToken(userId: string): Promise<{ token: string; userId: string }> {
+  return request(`/auth/test-token?userId=${encodeURIComponent(userId)}`, { method: 'POST' })
+}
+
 // ==================== Goods & Seckill ====================
 
 export function fetchGoods(): Promise<Goods[]> {
@@ -110,6 +114,17 @@ export function fetchStock(goodsId: number): Promise<number> {
 
 export function fetchResult(goodsId: number): Promise<OrderInfo> {
   return request<OrderInfo>(`/seckill/result/${goodsId}`)
+}
+
+// For stress testing: use per-user token
+export async function doSeckillWithToken(goodsId: number, token: string): Promise<void> {
+  const resp = await fetch(`/seckill/do/${goodsId}`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
+  })
+  if (resp.status === 429) throw new ApiError(429, '请求太频繁')
+  const body = await resp.json()
+  if (body.code !== 1) throw new ApiError(body.code || 0, body.message || '请求失败')
 }
 
 export { ApiError }

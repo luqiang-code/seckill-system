@@ -3,7 +3,7 @@ import { ref, onUnmounted } from 'vue'
 import StatCard from '../components/StatCard.vue'
 import ProgressBar from '../components/ProgressBar.vue'
 import LogConsole from '../components/LogConsole.vue'
-import { fetchStock, doSeckill } from '../api'
+import { fetchStock, doSeckillWithToken, getTestToken } from '../api'
 
 const POLL_MS = 150
 
@@ -110,9 +110,10 @@ async function startTest() {
 
 async function runUser(userIdx: number, endTime: number) {
   const userId = 'stress_' + userIdx + '_' + Date.now()
+  const { token } = await getTestToken(userId)
   while (Date.now() < endTime) {
     try {
-      await doSeckill(1, userId)
+      await doSeckillWithToken(1, token)
       reqCount.value++
     } catch {
       // ignore errors during stress test

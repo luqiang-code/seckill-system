@@ -7,13 +7,27 @@ const router = createRouter({
       path: '/',
       name: 'seckill',
       component: () => import('../views/SeckillView.vue'),
+      meta: { requiresAuth: true },
     },
     {
       path: '/dashboard',
       name: 'dashboard',
       component: () => import('../views/DashboardView.vue'),
+      meta: { requiresAuth: true },
+    },
+    {
+      path: '/login',
+      name: 'login',
+      component: () => import('../views/LoginView.vue'),
     },
   ],
+})
+
+router.beforeEach((to) => {
+  const token = localStorage.getItem('token')
+  if (to.meta.requiresAuth && !token) {
+    return { name: 'login' }
+  }
 })
 
 export default router

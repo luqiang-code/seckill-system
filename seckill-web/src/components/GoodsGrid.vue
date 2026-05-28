@@ -5,7 +5,6 @@ import type { Goods } from '../api/types'
 defineProps<{
   goodsList: Goods[]
   disabled: boolean
-  userId: string
 }>()
 
 const emit = defineEmits<{
@@ -20,7 +19,6 @@ const emit = defineEmits<{
       :key="g.id"
       :goods="g"
       :disabled="disabled"
-      :user-id="userId"
       @sold="emit('sold')"
     />
   </div>

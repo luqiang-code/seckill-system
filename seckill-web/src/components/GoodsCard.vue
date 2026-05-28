@@ -6,7 +6,6 @@ import type { Goods, OrderInfo } from '../api/types'
 const props = defineProps<{
   goods: Goods
   disabled: boolean
-  userId: string
 }>()
 
 const emit = defineEmits<{
@@ -68,7 +67,7 @@ async function handleSeckill() {
   clearResult()
 
   try {
-    await doSeckill(props.goods.id, props.userId)
+    await doSeckill(props.goods.id)
     resultType.value = 'success'
     resultMsg.value = '抢到了！'
     pollResult()
@@ -101,7 +100,7 @@ async function handleSeckill() {
 
 function pollResult() {
   const check = () => {
-    fetchResult(props.goods.id, props.userId)
+    fetchResult(props.goods.id)
       .then(order => {
         orderInfo.value = order
         resultMsg.value = '订单号: ' + order.id

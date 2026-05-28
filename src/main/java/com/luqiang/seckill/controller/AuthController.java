@@ -128,4 +128,10 @@ public class AuthController {
     public ApiResponse<?> logout() {
         return ApiResponse.success("已登出", null);
     }
+
+    @PostMapping("/test-token")
+    public ApiResponse<?> testToken(@RequestParam String userId) {
+        String token = JwtUtil.generate(userId);
+        return ApiResponse.success("ok", Map.of("token", token, "userId", userId));
+    }
 }
