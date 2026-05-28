@@ -11,7 +11,7 @@ public class WebConfig implements WebMvcConfigurer {
 
     @Override
     public void addViewControllers(ViewControllerRegistry registry) {
-        registry.addRedirectViewController("/", "/seckill.html");
+        registry.addRedirectViewController("/", "/index.html");
     }
 
     @Override

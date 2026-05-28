@@ -1,7 +1,7 @@
 <script setup lang="ts">
-import { ref } from 'vue'
+import { ref, onUnmounted } from 'vue'
 import { doSeckill, fetchResult, ApiError } from '../api'
-import type { Goods } from '../api/types'
+import type { Goods, OrderInfo } from '../api/types'
 
 const props = defineProps<{
   goods: Goods
@@ -13,11 +13,52 @@ const emit = defineEmits<{
   sold: []
 }>()
 
+const PAYMENT_DEADLINE_MS = 15 * 60 * 1000
 const DEBOUNCE_MS = 1000
 
 const resultType = ref<'success' | 'fail' | 'info' | ''>('')
 const resultMsg = ref('')
+const orderInfo = ref<OrderInfo | null>(null)
+const paymentLeft = ref(0)
 let cooldownUntil = 0
+let paymentTimer: ReturnType<typeof setInterval> | null = null
+
+function formatCountdown(seconds: number): string {
+  const m = Math.floor(seconds / 60)
+  const s = seconds % 60
+  return m + '分' + s + '秒'
+}
+
+function startPaymentCountdown() {
+  if (!orderInfo.value) return
+  const deadline = new Date(orderInfo.value.createTime).getTime() + PAYMENT_DEADLINE_MS
+
+  stopPaymentCountdown()
+  paymentTimer = setInterval(() => {
+    const remain = Math.max(0, Math.floor((deadline - Date.now()) / 1000))
+    paymentLeft.value = remain
+    if (remain <= 0) {
+      stopPaymentCountdown()
+      resultType.value = 'fail'
+      resultMsg.value = '订单已超时取消'
+      orderInfo.value = null
+    }
+  }, 200)
+}
+
+function stopPaymentCountdown() {
+  if (paymentTimer) {
+    clearInterval(paymentTimer)
+    paymentTimer = null
+  }
+}
+
+function handlePay() {
+  resultType.value = 'success'
+  resultMsg.value = '支付成功！订单号: ' + (orderInfo.value?.id ?? '')
+  stopPaymentCountdown()
+  paymentLeft.value = 0
+}
 
 async function handleSeckill() {
   const now = Date.now()
@@ -62,8 +103,9 @@ function pollResult() {
   const check = () => {
     fetchResult(props.goods.id, props.userId)
       .then(order => {
-        resultType.value = 'success'
+        orderInfo.value = order
         resultMsg.value = '订单号: ' + order.id
+        startPaymentCountdown()
       })
       .catch(err => {
         if (err instanceof ApiError && err.code === 3) {
@@ -77,7 +119,12 @@ function pollResult() {
 function clearResult() {
   resultType.value = ''
   resultMsg.value = ''
+  orderInfo.value = null
+  paymentLeft.value = 0
+  stopPaymentCountdown()
 }
+
+onUnmounted(() => stopPaymentCountdown())
 </script>
 
 <template>
@@ -99,6 +146,10 @@ function clearResult() {
         @click="handleSeckill"
       >{{ disabled ? '等待开场' : '立即秒杀' }}</button>
       <div v-if="resultType" class="result" :class="resultType">{{ resultMsg }}</div>
+      <div v-if="orderInfo && paymentLeft > 0" class="payment-bar">
+        <div class="payment-countdown">请在 <span class="countdown-num">{{ formatCountdown(paymentLeft) }}</span> 内完成支付</div>
+        <button class="pay-btn" @click="handlePay">立即支付</button>
+      </div>
     </div>
   </div>
 </template>
@@ -197,6 +248,42 @@ function clearResult() {
 .result.success { color: #27ae60; }
 .result.fail { color: #e74c3c; }
 .result.info { color: #2980b9; }
+
+.payment-bar {
+  margin-top: 10px;
+  padding: 10px 12px;
+  background: #fff8e1;
+  border: 1px solid #ffc107;
+  border-radius: 8px;
+  text-align: center;
+}
+
+.payment-countdown {
+  font-size: 13px;
+  color: #e65100;
+  margin-bottom: 8px;
+}
+
+.countdown-num {
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+}
+
+.pay-btn {
+  padding: 6px 24px;
+  border: none;
+  border-radius: 6px;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  color: #fff;
+  background: #ff9800;
+  transition: all 0.15s;
+}
+
+.pay-btn:active {
+  transform: scale(0.96);
+}
 
 @media (max-width: 500px) {
   .goods-card {
