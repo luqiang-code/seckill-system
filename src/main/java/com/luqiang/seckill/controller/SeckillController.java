@@ -2,7 +2,9 @@ package com.luqiang.seckill.controller;
 
 import com.luqiang.seckill.common.ApiResponse;
 import com.luqiang.seckill.entity.OrderInfo;
+import com.luqiang.seckill.interceptor.JwtAuthInterceptor;
 import com.luqiang.seckill.service.SeckillService;
+import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
@@ -16,8 +18,8 @@ public class SeckillController {
     }
 
     @PostMapping("/do/{id}")
-    public ApiResponse<Void> doSeckill(@PathVariable Long id,
-                                       @RequestParam(required = false) String userId) {
+    public ApiResponse<Void> doSeckill(@PathVariable Long id, HttpServletRequest request) {
+        String userId = (String) request.getAttribute(JwtAuthInterceptor.USER_ID_ATTR);
         if (userId == null || userId.isBlank()) {
             return ApiResponse.fail(401, "userId 缺失");
         }
@@ -30,11 +32,17 @@ public class SeckillController {
     }
 
     @GetMapping("/result/{id}")
-    public ApiResponse<OrderInfo> getResult(@PathVariable Long id,
-                                            @RequestParam(required = false) String userId) {
+    public ApiResponse<OrderInfo> getResult(@PathVariable Long id, HttpServletRequest request) {
+        String userId = (String) request.getAttribute(JwtAuthInterceptor.USER_ID_ATTR);
         if (userId == null || userId.isBlank()) {
             return ApiResponse.fail(401, "userId 缺失");
         }
         return seckillService.getResult(id, userId);
+    }
+
+    @GetMapping("/orders/{id}")
+    public ApiResponse<?> getRecentOrders(@PathVariable Long id,
+                                          @RequestParam(defaultValue = "20") int limit) {
+        return seckillService.getRecentOrders(id, limit);
     }
 }

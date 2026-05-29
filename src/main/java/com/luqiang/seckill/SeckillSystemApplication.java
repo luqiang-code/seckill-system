@@ -66,14 +66,29 @@ public class SeckillSystemApplication {
 
             for (Goods g : list) {
                 String sentinelKey = CacheConstants.stockKey(g.getId(), 0);
-                if (Boolean.TRUE.equals(redisTemplate.hasKey(sentinelKey))) {
-                    // Redis 已有数据（仅应用重启），沿用并预填本地缓存
-                    log.info("Redis库存已存在, goodsId={} 跳过覆盖,仅预填本地缓存", g.getId());
+                boolean hasKeys = Boolean.TRUE.equals(redisTemplate.hasKey(sentinelKey));
+
+                // 检查 Redis 中库存是否已耗尽
+                int totalRedisStock = 0;
+                if (hasKeys) {
                     for (int i = 0; i < CacheConstants.STOCK_SEGMENTS; i++) {
-                        localStockCache.preFill(CacheConstants.stockKey(g.getId(), i), PRE_FILL_BATCH);
+                        String v = redisTemplate.opsForValue().get(CacheConstants.stockKey(g.getId(), i));
+                        if (v != null) {
+                            totalRedisStock += Integer.parseInt(v);
+                        }
                     }
-                } else {
-                    // Redis 无数据（首次启动或 Redis 重启），从 DB 初始化
+                }
+
+                if (!hasKeys || totalRedisStock <= 0) {
+                    // Redis 无数据或库存已耗尽，从 DB 重新初始化
+                    if (hasKeys) {
+                        log.info("Redis库存已耗尽, goodsId={} 从数据库重新初始化", g.getId());
+                        for (int i = 0; i < CacheConstants.STOCK_SEGMENTS; i++) {
+                            redisTemplate.delete(CacheConstants.stockKey(g.getId(), i));
+                        }
+                    }
+                    redisTemplate.delete(CacheConstants.soldOutKey(g.getId()));
+
                     int base = g.getStock() / CacheConstants.STOCK_SEGMENTS;
                     int remainder = g.getStock() % CacheConstants.STOCK_SEGMENTS;
                     for (int i = 0; i < CacheConstants.STOCK_SEGMENTS; i++) {
@@ -84,6 +99,13 @@ public class SeckillSystemApplication {
                     }
                     log.info("初始化商品: {} 总库存: {} 分段数: {} 每段基础: {} 余数: {}",
                             g.getId(), g.getStock(), CacheConstants.STOCK_SEGMENTS, base, remainder);
+                } else {
+                    // Redis 有库存数据，沿用并预填本地缓存
+                    log.info("Redis库存已存在, goodsId={} 剩余={} 跳过覆盖,仅预填本地缓存", g.getId(), totalRedisStock);
+                    for (int i = 0; i < CacheConstants.STOCK_SEGMENTS; i++) {
+                        localStockCache.preFill(CacheConstants.stockKey(g.getId(), i), PRE_FILL_BATCH);
+                    }
+                    redisTemplate.delete(CacheConstants.soldOutKey(g.getId()));
                 }
             }
 

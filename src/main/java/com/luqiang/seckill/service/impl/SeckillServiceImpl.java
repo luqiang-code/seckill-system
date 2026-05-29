@@ -17,6 +17,7 @@ import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
@@ -58,11 +59,7 @@ public class SeckillServiceImpl implements SeckillService {
             return ApiResponse.fail(-1, "商品不存在");
         }
 
-        // 售罄标记快速短路：库存归零后不再遍历分片
-        if (Boolean.TRUE.equals(redisTemplate.hasKey(CacheConstants.soldOutKey(goodsId)))) {
-            return ApiResponse.fail(0, "库存不足");
-        }
-        // 延迟预热：首次请求时确保 Redis 库存 key 存在
+        // 延迟预热：首次请求时确保 Redis 库存 key 存在（必须在售罄检查前，warmupStock 会清除 soldOutKey）
         if (!warmedUpGoods.contains(goodsId)) {
             if (Boolean.FALSE.equals(redisTemplate.hasKey(CacheConstants.stockKey(goodsId, 0)))) {
                 if (!warmupStock(goodsId)) {
@@ -70,6 +67,11 @@ public class SeckillServiceImpl implements SeckillService {
                 }
             }
             warmedUpGoods.add(goodsId);
+        }
+
+        // 售罄标记快速短路：库存归零后不再遍历分片
+        if (Boolean.TRUE.equals(redisTemplate.hasKey(CacheConstants.soldOutKey(goodsId)))) {
+            return ApiResponse.fail(0, "库存不足");
         }
 
         int seg = CacheConstants.segmentFor(userId);
@@ -124,10 +126,12 @@ public class SeckillServiceImpl implements SeckillService {
                 localStockCache.rollback(stockKey);
                 return ApiResponse.fail(-4, "下单失败,请重试");
             }
+            redisTemplate.delete(CacheConstants.GOODS_LIST_KEY);
             return ApiResponse.success("秒杀成功", null);
         }
 
-        // 全部 segment 耗尽，设置售罄标记避免后续请求无效遍历
+        // 全部 segment 耗尽，删除商品列表缓存并设置售罄标记
+        redisTemplate.delete(CacheConstants.GOODS_LIST_KEY);
         redisTemplate.opsForValue().set(
                 CacheConstants.soldOutKey(goodsId), "1",
                 CacheConstants.SOLDOUT_TTL_SECONDS, TimeUnit.SECONDS);
@@ -176,6 +180,23 @@ public class SeckillServiceImpl implements SeckillService {
             }
         }
         return ApiResponse.fail(4, "未查询到订单");
+    }
+
+    @Override
+    public ApiResponse<List<Map<String, Object>>> getRecentOrders(Long goodsId, int limit) {
+        List<Map<String, Object>> orders = orderInfoRepository
+                .findByGoodsIdOrderByCreateTimeDesc(goodsId)
+                .stream()
+                .limit(limit)
+                .map(o -> {
+                    Map<String, Object> m = new java.util.LinkedHashMap<>();
+                    m.put("userId", o.getUserId());
+                    m.put("createTime", o.getCreateTime());
+                    m.put("status", o.getStatus());
+                    return m;
+                })
+                .toList();
+        return ApiResponse.success("查询成功", orders);
     }
 
     private boolean warmupStock(Long goodsId) {
