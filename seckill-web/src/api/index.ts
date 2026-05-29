@@ -118,6 +118,10 @@ export function fetchResult(goodsId: number): Promise<OrderInfo> {
   return request<OrderInfo>(`/seckill/result/${goodsId}`)
 }
 
+export function fetchRecentOrders(goodsId: number, limit = 20): Promise<{ userId: string; createTime: string; status: number }[]> {
+  return request(`/seckill/orders/${goodsId}?limit=${limit}`)
+}
+
 // For stress testing: use per-user token
 export async function doSeckillWithToken(goodsId: number, token: string): Promise<void> {
   const resp = await fetch(`/seckill/do/${goodsId}`, {

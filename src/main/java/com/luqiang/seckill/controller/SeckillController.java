@@ -39,4 +39,10 @@ public class SeckillController {
         }
         return seckillService.getResult(id, userId);
     }
+
+    @GetMapping("/orders/{id}")
+    public ApiResponse<?> getRecentOrders(@PathVariable Long id,
+                                          @RequestParam(defaultValue = "20") int limit) {
+        return seckillService.getRecentOrders(id, limit);
+    }
 }
