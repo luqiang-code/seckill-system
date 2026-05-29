@@ -23,4 +23,9 @@ public class GoodsController {
         List<Goods> goods = goodsService.listGoods();
         return ApiResponse.success("查询成功", goods);
     }
+
+    @GetMapping("/detail/{id}")
+    public ApiResponse<?> detail(@PathVariable Long id) {
+        return ApiResponse.success("查询成功", goodsService.getGoodsDetail(id));
+    }
 }

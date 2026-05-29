@@ -106,6 +106,13 @@ export function fetchGoods(): Promise<Goods[]> {
   return request<Goods[]>('/goods/list')
 }
 
+export function fetchGoodsDetail(goodsId: number): Promise<{
+  id: number; name: string; price: number;
+  initialStock: number; currentStock: number; sold: number
+}> {
+  return request(`/goods/detail/${goodsId}`)
+}
+
 export function doSeckill(goodsId: number): Promise<void> {
   return request<void>(`/seckill/do/${goodsId}`, { method: 'POST' })
 }

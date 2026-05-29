@@ -1,7 +1,10 @@
 <script setup lang="ts">
 import { ref, onUnmounted } from 'vue'
+import { useRouter } from 'vue-router'
 import { doSeckill, fetchResult, ApiError } from '../api'
 import type { Goods, OrderInfo } from '../api/types'
+
+const router = useRouter()
 
 const props = defineProps<{
   goods: Goods
@@ -123,16 +126,21 @@ function clearResult() {
   stopPaymentCountdown()
 }
 
+function goDetail() {
+  router.push(`/goods/${props.goods.id}`)
+}
+
 onUnmounted(() => stopPaymentCountdown())
 </script>
 
 <template>
   <div class="goods-card">
-    <div class="icon" :class="goods.id === 1 ? 'phone' : 'laptop'">
+    <div class="icon clickable" :class="goods.id === 1 ? 'phone' : 'laptop'" @click="goDetail">
       {{ goods.id === 1 ? '📱' : '💻' }}
     </div>
-    <div class="info">
+    <div class="info clickable" @click="goDetail">
       <div class="name">{{ goods.name }}</div>
+      <div class="view-hint">点击查看详情 →</div>
       <div class="price"><span class="unit">¥</span>{{ goods.price.toLocaleString() }}</div>
       <div class="stock-info">
         剩余库存 <span class="num">{{ goods.stock }}</span> 件
@@ -189,6 +197,16 @@ onUnmounted(() => stopPaymentCountdown())
   color: #333;
   margin-bottom: 4px;
 }
+
+.view-hint {
+  font-size: 12px;
+  color: #ccc;
+  margin-bottom: 2px;
+}
+
+.clickable { cursor: pointer; }
+.clickable:hover .name { color: #e74c3c; }
+.clickable:hover .view-hint { color: #e74c3c; }
 
 .price {
   font-size: 22px;

@@ -2,6 +2,7 @@ package com.luqiang.seckill.service.impl;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.luqiang.seckill.common.CacheConstants;
+import com.luqiang.seckill.common.LocalStockCache;
 import com.luqiang.seckill.common.RedisUtil;
 import com.luqiang.seckill.entity.Goods;
 import com.luqiang.seckill.repository.GoodsRepository;
@@ -12,7 +13,9 @@ import org.springframework.stereotype.Service;
 
 import java.util.Collections;
 import java.util.Arrays;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.ThreadLocalRandom;
 
 @Service
@@ -22,13 +25,16 @@ public class GoodsServiceImpl implements GoodsService {
     private final RedisUtil redisUtil;
     private final GoodsRepository goodsRepository;
     private final ObjectMapper objectMapper;
+    private final LocalStockCache localStockCache;
 
     public GoodsServiceImpl(RedisUtil redisUtil,
                             GoodsRepository goodsRepository,
-                            ObjectMapper objectMapper) {
+                            ObjectMapper objectMapper,
+                            LocalStockCache localStockCache) {
         this.redisUtil = redisUtil;
         this.goodsRepository = goodsRepository;
         this.objectMapper = objectMapper;
+        this.localStockCache = localStockCache;
     }
 
     @Override
@@ -97,5 +103,33 @@ public class GoodsServiceImpl implements GoodsService {
             log.error("查询商品失败", e);
             throw new RuntimeException("查询商品失败", e);
         }
+    }
+
+    @Override
+    public Map<String, Object> getGoodsDetail(Long goodsId) {
+        Goods goods = goodsRepository.findById(goodsId)
+                .orElseThrow(() -> new RuntimeException("商品不存在"));
+
+        // 汇总 Redis 分段 + 本地缓存库存
+        int redisStock = 0;
+        int localStock = 0;
+        for (int i = 0; i < CacheConstants.STOCK_SEGMENTS; i++) {
+            String v = redisUtil.get(CacheConstants.stockKey(goodsId, i));
+            if (v != null) {
+                redisStock += Integer.parseInt(v);
+            }
+            localStock += localStockCache.localRemaining(CacheConstants.stockKey(goodsId, i));
+        }
+        int currentStock = redisStock + localStock;
+        int sold = goods.getStock() - currentStock;
+
+        Map<String, Object> result = new LinkedHashMap<>();
+        result.put("id", goods.getId());
+        result.put("name", goods.getName());
+        result.put("price", goods.getPrice());
+        result.put("initialStock", goods.getStock());
+        result.put("currentStock", Math.max(0, currentStock));
+        result.put("sold", Math.max(0, sold));
+        return result;
     }
 }
