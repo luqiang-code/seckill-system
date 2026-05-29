@@ -1,9 +1,11 @@
 <script setup lang="ts">
 import { ref, onMounted, onUnmounted } from 'vue'
+import { computed } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { useCountdown } from '../composables/useCountdown'
 import { useAuth } from '../composables/useAuth'
-import { fetchGoodsDetail, fetchRecentOrders, doSeckill, fetchResult, ApiError } from '../api'
+import { fetchGoodsDetail, fetchRecentOrders, doSeckill, fetchResult, payOrder, ApiError } from '../api'
+import { PRODUCT_META } from '../api/types'
 import type { OrderInfo } from '../api/types'
 
 const route = useRoute()
@@ -32,6 +34,7 @@ let paymentTimer: ReturnType<typeof setInterval> | null = null
 
 const soldPct = ref(0)
 const stockPct = ref(100)
+const meta = computed(() => PRODUCT_META[goodsId] ?? { emoji: '📦', color: '#f5f5f5' })
 
 async function loadDetail() {
   loading.value = true
@@ -85,11 +88,18 @@ function stopPaymentCountdown() {
   if (paymentTimer) { clearInterval(paymentTimer); paymentTimer = null }
 }
 
-function handlePay() {
-  resultType.value = 'success'
-  resultMsg.value = '支付成功！订单号: ' + (orderInfo.value?.id ?? '')
-  stopPaymentCountdown()
-  paymentLeft.value = 0
+async function handlePay() {
+  if (!orderInfo.value) return
+  try {
+    await payOrder(orderInfo.value.id)
+    resultType.value = 'success'
+    resultMsg.value = '支付成功！订单号: ' + (orderInfo.value.id ?? '')
+    stopPaymentCountdown()
+    paymentLeft.value = 0
+  } catch (e) {
+    resultType.value = 'fail'
+    resultMsg.value = e instanceof ApiError ? e.message : '支付失败'
+  }
 }
 
 async function handleSeckill() {
@@ -160,8 +170,8 @@ onUnmounted(() => stopPaymentCountdown())
     <template v-else-if="detail">
       <div class="detail-card">
         <div class="hero">
-          <div class="hero-icon" :class="detail.id === 1 ? 'phone' : 'laptop'">
-            {{ detail.id === 1 ? '📱' : '💻' }}
+          <div class="hero-icon" :style="{ background: meta.color }">
+            {{ meta.emoji }}
           </div>
         </div>
 
@@ -254,8 +264,6 @@ onUnmounted(() => stopPaymentCountdown())
 
 .hero { background: linear-gradient(135deg, #fafafa, #f0f0f0); padding: 40px 0; text-align: center; }
 .hero-icon { width: 100px; height: 100px; border-radius: 20px; display: inline-flex; align-items: center; justify-content: center; font-size: 48px; }
-.hero-icon.phone { background: #e8f5e9; }
-.hero-icon.laptop { background: #e3f2fd; }
 
 .info-section { padding: 24px; }
 
