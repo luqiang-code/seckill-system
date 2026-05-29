@@ -36,7 +36,7 @@ services:
     container_name: seckill-app
     ports:
       - "8080:8080"
-    entrypoint: ["java", "-jar", "/app/app.jar", "--spring.profiles.active=simple"]
+    entrypoint: ["java", "-Duser.timezone=Asia/Shanghai", "-jar", "/app/app.jar", "--spring.profiles.active=simple"]
     depends_on:
       mysql:
         condition: service_healthy
