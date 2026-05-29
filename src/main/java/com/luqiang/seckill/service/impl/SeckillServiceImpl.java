@@ -16,12 +16,10 @@ import org.springframework.data.redis.core.SessionCallback;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Service;
 
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
-import java.util.Set;
+import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.TimeUnit;
+import java.util.stream.Collectors;
 
 @Service
 public class SeckillServiceImpl implements SeckillService {
@@ -197,6 +195,53 @@ public class SeckillServiceImpl implements SeckillService {
                 })
                 .toList();
         return ApiResponse.success("查询成功", orders);
+    }
+
+    @Override
+    public ApiResponse<List<Map<String, Object>>> getMyOrders(String userId, Integer status, int limit) {
+        List<OrderInfo> orders;
+        if (status != null) {
+            orders = orderInfoRepository.findByUserIdAndStatusOrderByCreateTimeDesc(userId, status);
+        } else {
+            orders = orderInfoRepository.findByUserIdOrderByCreateTimeDesc(userId);
+        }
+
+        Set<Long> goodsIds = orders.stream().map(OrderInfo::getGoodsId).collect(Collectors.toSet());
+        Map<Long, String> goodsNameMap = goodsRepository.findAllById(goodsIds).stream()
+                .collect(Collectors.toMap(Goods::getId, Goods::getName));
+
+        List<Map<String, Object>> result = orders.stream()
+                .limit(limit)
+                .map(o -> {
+                    Map<String, Object> m = new LinkedHashMap<>();
+                    m.put("id", o.getId());
+                    m.put("goodsId", o.getGoodsId());
+                    m.put("goodsName", goodsNameMap.getOrDefault(o.getGoodsId(), "未知商品"));
+                    m.put("userId", o.getUserId());
+                    m.put("createTime", o.getCreateTime());
+                    m.put("status", o.getStatus());
+                    return m;
+                })
+                .collect(Collectors.toList());
+        return ApiResponse.success("查询成功", result);
+    }
+
+    @Override
+    public ApiResponse<Void> payOrder(Long orderId, String userId) {
+        Optional<OrderInfo> opt = orderInfoRepository.findById(orderId);
+        if (opt.isEmpty()) {
+            return ApiResponse.fail(-1, "订单不存在");
+        }
+        OrderInfo order = opt.get();
+        if (!order.getUserId().equals(userId)) {
+            return ApiResponse.fail(-1, "无权操作");
+        }
+        if (!Integer.valueOf(OrderInfo.STATUS_PENDING).equals(order.getStatus())) {
+            return ApiResponse.fail(-1, "订单状态异常");
+        }
+        order.setStatus(OrderInfo.STATUS_PAID);
+        orderInfoRepository.save(order);
+        return ApiResponse.success("支付成功", null);
     }
 
     private boolean warmupStock(Long goodsId) {

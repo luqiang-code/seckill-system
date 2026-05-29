@@ -10,4 +10,8 @@ public interface OrderInfoRepository extends JpaRepository<OrderInfo, Long> {
     Optional<OrderInfo> findByGoodsIdAndUserId(Long goodsId, String userId);
 
     List<OrderInfo> findByGoodsIdOrderByCreateTimeDesc(Long goodsId);
+
+    List<OrderInfo> findByUserIdOrderByCreateTimeDesc(String userId);
+
+    List<OrderInfo> findByUserIdAndStatusOrderByCreateTimeDesc(String userId, Integer status);
 }

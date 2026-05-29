@@ -13,7 +13,7 @@ spring:
     name: seckill-system
 
   datasource:
-    url: jdbc:mysql://127.0.0.1:3307/seckill?useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=Asia/Shanghai&rewriteBatchedStatements=true
+    url: jdbc:mysql://127.0.0.1:3307/seckill?useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=Asia/Shanghai&rewriteBatchedStatements=true&characterEncoding=UTF-8
     username: seckill
     password: seckill123
     driver-class-name: com.mysql.cj.jdbc.Driver

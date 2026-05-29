@@ -14,4 +14,8 @@ public interface SeckillService {
     ApiResponse<OrderInfo> getResult(Long goodsId, String userId);
 
     ApiResponse<List<Map<String, Object>>> getRecentOrders(Long goodsId, int limit);
+
+    ApiResponse<List<Map<String, Object>>> getMyOrders(String userId, Integer status, int limit);
+
+    ApiResponse<Void> payOrder(Long orderId, String userId);
 }
