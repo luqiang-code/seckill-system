@@ -47,7 +47,9 @@ public class GoodsServiceImpl implements GoodsService {
                 if (CacheConstants.EMPTY_CACHE_MARKER.equals(cache)) {
                     return Collections.emptyList();
                 }
-                return Arrays.asList(objectMapper.readValue(cache, Goods[].class));
+                List<Goods> goodsList = Arrays.asList(objectMapper.readValue(cache, Goods[].class));
+                refreshStock(goodsList);
+                return goodsList;
             }
 
             Boolean locked = redisUtil.setIfAbsent(CacheConstants.GOODS_LIST_LOCK_KEY, "1", 10);
@@ -58,7 +60,9 @@ public class GoodsServiceImpl implements GoodsService {
                         if (CacheConstants.EMPTY_CACHE_MARKER.equals(cacheAgain)) {
                             return Collections.emptyList();
                         }
-                        return Arrays.asList(objectMapper.readValue(cacheAgain, Goods[].class));
+                        List<Goods> goodsList = Arrays.asList(objectMapper.readValue(cacheAgain, Goods[].class));
+                        refreshStock(goodsList);
+                        return goodsList;
                     }
 
                     List<Goods> goodsList = goodsRepository.findAll();
@@ -70,6 +74,8 @@ public class GoodsServiceImpl implements GoodsService {
                         );
                         return Collections.emptyList();
                     }
+
+                    refreshStock(goodsList);
 
                     int ttl = CacheConstants.GOODS_LIST_TTL_SECONDS + ThreadLocalRandom.current()
                             .nextInt(CacheConstants.GOODS_LIST_TTL_RANDOM_BOUND_SECONDS + 1);
@@ -87,13 +93,16 @@ public class GoodsServiceImpl implements GoodsService {
                 if (CacheConstants.EMPTY_CACHE_MARKER.equals(cacheRetry)) {
                     return Collections.emptyList();
                 }
-                return Arrays.asList(objectMapper.readValue(cacheRetry, Goods[].class));
+                List<Goods> goodsList = Arrays.asList(objectMapper.readValue(cacheRetry, Goods[].class));
+                refreshStock(goodsList);
+                return goodsList;
             }
 
             List<Goods> fallbackList = goodsRepository.findAll();
             if (fallbackList == null || fallbackList.isEmpty()) {
                 return Collections.emptyList();
             }
+            refreshStock(fallbackList);
             return fallbackList;
 
         } catch (InterruptedException e) {
@@ -110,17 +119,7 @@ public class GoodsServiceImpl implements GoodsService {
         Goods goods = goodsRepository.findById(goodsId)
                 .orElseThrow(() -> new RuntimeException("商品不存在"));
 
-        // 汇总 Redis 分段 + 本地缓存库存
-        int redisStock = 0;
-        int localStock = 0;
-        for (int i = 0; i < CacheConstants.STOCK_SEGMENTS; i++) {
-            String v = redisUtil.get(CacheConstants.stockKey(goodsId, i));
-            if (v != null) {
-                redisStock += Integer.parseInt(v);
-            }
-            localStock += localStockCache.localRemaining(CacheConstants.stockKey(goodsId, i));
-        }
-        int currentStock = redisStock + localStock;
+        int currentStock = calcCurrentStock(goodsId);
         int sold = goods.getStock() - currentStock;
 
         Map<String, Object> result = new LinkedHashMap<>();
@@ -131,5 +130,30 @@ public class GoodsServiceImpl implements GoodsService {
         result.put("currentStock", Math.max(0, currentStock));
         result.put("sold", Math.max(0, sold));
         return result;
+    }
+
+    /**
+     * 汇总 Redis 分段库存 + 本地缓存库存，计算实时剩余数量。
+     */
+    private int calcCurrentStock(Long goodsId) {
+        int redisStock = 0;
+        int localStock = 0;
+        for (int i = 0; i < CacheConstants.STOCK_SEGMENTS; i++) {
+            String v = redisUtil.get(CacheConstants.stockKey(goodsId, i));
+            if (v != null) {
+                redisStock += Integer.parseInt(v);
+            }
+            localStock += localStockCache.localRemaining(CacheConstants.stockKey(goodsId, i));
+        }
+        return Math.max(0, redisStock + localStock);
+    }
+
+    /**
+     * 为商品列表刷新实时库存。
+     */
+    private void refreshStock(List<Goods> goodsList) {
+        for (Goods goods : goodsList) {
+            goods.setStock(calcCurrentStock(goods.getId()));
+        }
     }
 }
