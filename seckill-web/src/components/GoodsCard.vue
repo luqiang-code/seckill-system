@@ -1,7 +1,8 @@
 <script setup lang="ts">
-import { ref, onUnmounted } from 'vue'
+import { ref, onUnmounted, computed } from 'vue'
 import { useRouter } from 'vue-router'
-import { doSeckill, fetchResult, ApiError } from '../api'
+import { doSeckill, fetchResult, payOrder, ApiError } from '../api'
+import { PRODUCT_META } from '../api/types'
 import type { Goods, OrderInfo } from '../api/types'
 
 const router = useRouter()
@@ -9,6 +10,7 @@ const router = useRouter()
 const props = defineProps<{
   goods: Goods
   disabled: boolean
+  initialStock: number
 }>()
 
 const emit = defineEmits<{
@@ -25,6 +27,12 @@ const paymentLeft = ref(0)
 let cooldownUntil = 0
 let paymentTimer: ReturnType<typeof setInterval> | null = null
 
+const meta = computed(() => PRODUCT_META[props.goods.id] ?? { emoji: '📦', color: '#f5f5f5' })
+const stockPct = computed(() => props.initialStock > 0
+  ? Math.round((props.goods.stock / props.initialStock) * 100)
+  : 0)
+const isSoldOut = computed(() => props.goods.stock <= 0)
+
 function formatCountdown(seconds: number): string {
   const m = Math.floor(seconds / 60)
   const s = seconds % 60
@@ -34,7 +42,6 @@ function formatCountdown(seconds: number): string {
 function startPaymentCountdown() {
   if (!orderInfo.value) return
   const deadline = new Date(orderInfo.value.createTime).getTime() + PAYMENT_DEADLINE_MS
-
   stopPaymentCountdown()
   paymentTimer = setInterval(() => {
     const remain = Math.max(0, Math.floor((deadline - Date.now()) / 1000))
@@ -55,18 +62,24 @@ function stopPaymentCountdown() {
   }
 }
 
-function handlePay() {
-  resultType.value = 'success'
-  resultMsg.value = '支付成功！订单号: ' + (orderInfo.value?.id ?? '')
-  stopPaymentCountdown()
-  paymentLeft.value = 0
+async function handlePay() {
+  if (!orderInfo.value) return
+  try {
+    await payOrder(orderInfo.value.id)
+    resultType.value = 'success'
+    resultMsg.value = '支付成功！订单号: ' + (orderInfo.value.id ?? '')
+    stopPaymentCountdown()
+    paymentLeft.value = 0
+  } catch (e) {
+    resultType.value = 'fail'
+    resultMsg.value = e instanceof ApiError ? e.message : '支付失败'
+  }
 }
 
 async function handleSeckill() {
   const now = Date.now()
   if (now < cooldownUntil) return
   cooldownUntil = now + DEBOUNCE_MS
-
   clearResult()
 
   try {
@@ -78,21 +91,10 @@ async function handleSeckill() {
   } catch (e) {
     if (e instanceof ApiError) {
       switch (e.code) {
-        case 429:
-          resultType.value = 'info'
-          resultMsg.value = '请求太频繁'
-          break
-        case 2:
-          resultType.value = 'info'
-          resultMsg.value = '已抢过'
-          break
-        case 0:
-          resultType.value = 'fail'
-          resultMsg.value = '已售罄'
-          break
-        default:
-          resultType.value = 'fail'
-          resultMsg.value = e.message
+        case 429: resultType.value = 'info'; resultMsg.value = '请求太频繁'; break
+        case 2: resultType.value = 'info'; resultMsg.value = '已抢过'; break
+        case 0: resultType.value = 'fail'; resultMsg.value = '已售罄'; break
+        default: resultType.value = 'fail'; resultMsg.value = e.message
       }
     } else {
       resultType.value = 'fail'
@@ -110,9 +112,7 @@ function pollResult() {
         startPaymentCountdown()
       })
       .catch(err => {
-        if (err instanceof ApiError && err.code === 3) {
-          setTimeout(check, 500)
-        }
+        if (err instanceof ApiError && err.code === 3) setTimeout(check, 500)
       })
   }
   setTimeout(check, 300)
@@ -134,29 +134,37 @@ onUnmounted(() => stopPaymentCountdown())
 </script>
 
 <template>
-  <div class="goods-card">
-    <div class="icon clickable" :class="goods.id === 1 ? 'phone' : 'laptop'" @click="goDetail">
-      {{ goods.id === 1 ? '📱' : '💻' }}
+  <div class="goods-card" :class="{ 'sold-out': isSoldOut }">
+    <div class="icon clickable" :style="{ background: meta.color }" @click="goDetail">
+      {{ meta.emoji }}
     </div>
     <div class="info clickable" @click="goDetail">
       <div class="name">{{ goods.name }}</div>
       <div class="view-hint">点击查看详情 →</div>
       <div class="price"><span class="unit">¥</span>{{ goods.price.toLocaleString() }}</div>
-      <div class="stock-info">
-        剩余库存 <span class="num">{{ goods.stock }}</span> 件
+      <div class="stock-section">
+        <div class="stock-bar-bg">
+          <div class="stock-bar-fill" :style="{ width: stockPct + '%' }" :class="{ low: stockPct < 20 }"></div>
+        </div>
+        <div class="stock-text">
+          剩余 <span class="num">{{ goods.stock }}</span> 件
+        </div>
       </div>
     </div>
     <div class="action">
       <button
         class="btn"
-        :disabled="disabled"
+        :disabled="disabled || isSoldOut"
         @click="handleSeckill"
-      >{{ disabled ? '等待开场' : '立即秒杀' }}</button>
+      >{{ isSoldOut ? '已售罄' : disabled ? '等待开场' : '立即秒杀' }}</button>
       <div v-if="resultType" class="result" :class="resultType">{{ resultMsg }}</div>
       <div v-if="orderInfo && paymentLeft > 0" class="payment-bar">
         <div class="payment-countdown">请在 <span class="countdown-num">{{ formatCountdown(paymentLeft) }}</span> 内完成支付</div>
         <button class="pay-btn" @click="handlePay">立即支付</button>
       </div>
+    </div>
+    <div v-if="isSoldOut" class="soldout-overlay">
+      <span>已售罄</span>
     </div>
   </div>
 </template>
@@ -170,21 +178,30 @@ onUnmounted(() => stopPaymentCountdown())
   display: flex;
   align-items: center;
   gap: 20px;
+  position: relative;
+  overflow: hidden;
+  transition: transform 0.15s;
+}
+
+.goods-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
+}
+
+.goods-card.sold-out {
+  opacity: 0.7;
 }
 
 .icon {
   width: 64px;
   height: 64px;
-  border-radius: 12px;
+  border-radius: 14px;
   display: flex;
   align-items: center;
   justify-content: center;
   font-size: 30px;
   flex-shrink: 0;
 }
-
-.icon.phone { background: #e8f5e9; }
-.icon.laptop { background: #e3f2fd; }
 
 .info {
   flex: 1;
@@ -212,19 +229,45 @@ onUnmounted(() => stopPaymentCountdown())
   font-size: 22px;
   font-weight: 700;
   color: #e74c3c;
-  margin-bottom: 2px;
+  margin-bottom: 10px;
 }
 
 .price .unit {
   font-size: 14px;
 }
 
-.stock-info {
-  font-size: 13px;
-  color: #999;
+.stock-section {
+  display: flex;
+  align-items: center;
+  gap: 10px;
 }
 
-.stock-info .num {
+.stock-bar-bg {
+  flex: 1;
+  height: 6px;
+  border-radius: 3px;
+  background: #eee;
+  max-width: 120px;
+}
+
+.stock-bar-fill {
+  height: 100%;
+  border-radius: 3px;
+  background: linear-gradient(90deg, #27ae60, #2ecc71);
+  transition: width 0.3s;
+}
+
+.stock-bar-fill.low {
+  background: linear-gradient(90deg, #e74c3c, #f39c12);
+}
+
+.stock-text {
+  font-size: 13px;
+  color: #999;
+  white-space: nowrap;
+}
+
+.stock-text .num {
   color: #e74c3c;
   font-weight: 600;
 }
@@ -302,16 +345,29 @@ onUnmounted(() => stopPaymentCountdown())
   transform: scale(0.96);
 }
 
+.soldout-overlay {
+  position: absolute;
+  top: 12px;
+  right: -28px;
+  background: #999;
+  color: #fff;
+  font-size: 12px;
+  font-weight: 700;
+  padding: 3px 32px;
+  transform: rotate(45deg);
+}
+
 @media (max-width: 500px) {
   .goods-card {
     flex-direction: column;
     text-align: center;
   }
-
+  .stock-section {
+    justify-content: center;
+  }
   .action {
     width: 100%;
   }
-
   .btn {
     width: 100%;
   }
