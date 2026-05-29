@@ -140,4 +140,15 @@ export async function doSeckillWithToken(goodsId: number, token: string): Promis
   if (body.code !== 1) throw new ApiError(body.code || 0, body.message || '请求失败')
 }
 
+export function fetchMyOrders(status?: number | null, limit = 50): Promise<OrderInfo[]> {
+  const params = new URLSearchParams()
+  if (status != null) params.set('status', String(status))
+  params.set('limit', String(limit))
+  return request<OrderInfo[]>(`/seckill/my-orders?${params.toString()}`)
+}
+
+export function payOrder(orderId: number): Promise<void> {
+  return request<void>(`/seckill/pay/${orderId}`, { method: 'POST' })
+}
+
 export { ApiError }
