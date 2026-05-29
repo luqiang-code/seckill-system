@@ -45,4 +45,24 @@ public class SeckillController {
                                           @RequestParam(defaultValue = "20") int limit) {
         return seckillService.getRecentOrders(id, limit);
     }
+
+    @PostMapping("/pay/{id}")
+    public ApiResponse<Void> payOrder(@PathVariable Long id, HttpServletRequest request) {
+        String userId = (String) request.getAttribute(JwtAuthInterceptor.USER_ID_ATTR);
+        if (userId == null || userId.isBlank()) {
+            return ApiResponse.fail(401, "userId 缺失");
+        }
+        return seckillService.payOrder(id, userId);
+    }
+
+    @GetMapping("/my-orders")
+    public ApiResponse<?> getMyOrders(HttpServletRequest request,
+                                      @RequestParam(required = false) Integer status,
+                                      @RequestParam(defaultValue = "50") int limit) {
+        String userId = (String) request.getAttribute(JwtAuthInterceptor.USER_ID_ATTR);
+        if (userId == null || userId.isBlank()) {
+            return ApiResponse.fail(401, "userId 缺失");
+        }
+        return seckillService.getMyOrders(userId, status, limit);
+    }
 }
