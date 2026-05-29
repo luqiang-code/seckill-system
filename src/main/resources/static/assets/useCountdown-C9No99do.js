@@ -1,0 +1,1 @@
+import{g as e,o as t,x as n}from"./index-uBwDENJU.js";function r(r,i){let a=n(r),o=n(!0),s=Date.now(),c;function l(){let e=Date.now(),t=(e-s)/1e3;if(o.value=t<r,o.value)a.value=r-t;else{let t=(s+i*1e3-e)/1e3;t<=0?(s=e,a.value=r):a.value=t}}return c=setInterval(l,200),l(),e(()=>clearInterval(c)),{remaining:a,status:t(()=>o.value?`open`:`waiting`),isWindowOpen:o}}export{r as t};
