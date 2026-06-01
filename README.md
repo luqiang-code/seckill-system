@@ -1,5 +1,7 @@
 # 高并发秒杀系统
 
+> 项目已部署上线：[http://goods.39.106.14.9.nip.io/](http://goods.39.106.14.9.nip.io/)
+
 基于 Spring Boot + Redis Sentinel + MySQL 的秒杀系统，通过库存分段 + Pipeline 批量操作 + 削峰队列 + 批量落库实现 **~370 QPS** 稳定吞吐。
 
 [:globe_with_meridians: 交互式知识图谱](https://luqiang-code.github.io/seckill-system/) — 可视化浏览架构分层、节点关系和学习导览。
