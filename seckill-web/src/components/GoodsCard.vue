@@ -1,9 +1,10 @@
 <script setup lang="ts">
-import { ref, onUnmounted, computed } from 'vue'
+import { computed } from 'vue'
 import { useRouter } from 'vue-router'
-import { doSeckill, fetchResult, payOrder, ApiError } from '../api'
+import { useSeckill } from '../composables/useSeckill'
+import { formatCountdown } from '../api/constants'
 import { PRODUCT_META } from '../api/types'
-import type { Goods, OrderInfo } from '../api/types'
+import type { Goods } from '../api/types'
 
 const router = useRouter()
 
@@ -17,15 +18,10 @@ const emit = defineEmits<{
   sold: []
 }>()
 
-const PAYMENT_DEADLINE_MS = 15 * 60 * 1000
-const DEBOUNCE_MS = 1000
-
-const resultType = ref<'success' | 'fail' | 'info' | ''>('')
-const resultMsg = ref('')
-const orderInfo = ref<OrderInfo | null>(null)
-const paymentLeft = ref(0)
-let cooldownUntil = 0
-let paymentTimer: ReturnType<typeof setInterval> | null = null
+const {
+  resultType, resultMsg, orderInfo, paymentLeft,
+  handleSeckill, handlePay,
+} = useSeckill(() => props.goods.id)
 
 const meta = computed(() => PRODUCT_META[props.goods.id] ?? { emoji: '📦', color: '#f5f5f5' })
 const stockPct = computed(() => props.initialStock > 0
@@ -33,104 +29,13 @@ const stockPct = computed(() => props.initialStock > 0
   : 0)
 const isSoldOut = computed(() => props.goods.stock <= 0)
 
-function formatCountdown(seconds: number): string {
-  const m = Math.floor(seconds / 60)
-  const s = seconds % 60
-  return m + '分' + s + '秒'
-}
-
-function startPaymentCountdown() {
-  if (!orderInfo.value) return
-  const deadline = new Date(orderInfo.value.createTime).getTime() + PAYMENT_DEADLINE_MS
-  stopPaymentCountdown()
-  paymentTimer = setInterval(() => {
-    const remain = Math.max(0, Math.floor((deadline - Date.now()) / 1000))
-    paymentLeft.value = remain
-    if (remain <= 0) {
-      stopPaymentCountdown()
-      resultType.value = 'fail'
-      resultMsg.value = '订单已超时取消'
-      orderInfo.value = null
-    }
-  }, 200)
-}
-
-function stopPaymentCountdown() {
-  if (paymentTimer) {
-    clearInterval(paymentTimer)
-    paymentTimer = null
-  }
-}
-
-async function handlePay() {
-  if (!orderInfo.value) return
-  try {
-    await payOrder(orderInfo.value.id)
-    resultType.value = 'success'
-    resultMsg.value = '支付成功！订单号: ' + (orderInfo.value.id ?? '')
-    stopPaymentCountdown()
-    paymentLeft.value = 0
-  } catch (e) {
-    resultType.value = 'fail'
-    resultMsg.value = e instanceof ApiError ? e.message : '支付失败'
-  }
-}
-
-async function handleSeckill() {
-  const now = Date.now()
-  if (now < cooldownUntil) return
-  cooldownUntil = now + DEBOUNCE_MS
-  clearResult()
-
-  try {
-    await doSeckill(props.goods.id)
-    resultType.value = 'success'
-    resultMsg.value = '抢到了！'
-    pollResult()
-    emit('sold')
-  } catch (e) {
-    if (e instanceof ApiError) {
-      switch (e.code) {
-        case 429: resultType.value = 'info'; resultMsg.value = '请求太频繁'; break
-        case 2: resultType.value = 'info'; resultMsg.value = '已抢过'; break
-        case 0: resultType.value = 'fail'; resultMsg.value = '已售罄'; break
-        default: resultType.value = 'fail'; resultMsg.value = e.message
-      }
-    } else {
-      resultType.value = 'fail'
-      resultMsg.value = '网络错误'
-    }
-  }
-}
-
-function pollResult() {
-  const check = () => {
-    fetchResult(props.goods.id)
-      .then(order => {
-        orderInfo.value = order
-        resultMsg.value = '订单号: ' + order.id
-        startPaymentCountdown()
-      })
-      .catch(err => {
-        if (err instanceof ApiError && err.code === 3) setTimeout(check, 500)
-      })
-  }
-  setTimeout(check, 300)
-}
-
-function clearResult() {
-  resultType.value = ''
-  resultMsg.value = ''
-  orderInfo.value = null
-  paymentLeft.value = 0
-  stopPaymentCountdown()
+function onSeckill() {
+  handleSeckill(() => emit('sold'))
 }
 
 function goDetail() {
   router.push(`/goods/${props.goods.id}`)
 }
-
-onUnmounted(() => stopPaymentCountdown())
 </script>
 
 <template>
@@ -155,7 +60,7 @@ onUnmounted(() => stopPaymentCountdown())
       <button
         class="btn"
         :disabled="disabled || isSoldOut"
-        @click="handleSeckill"
+        @click="onSeckill"
       >{{ isSoldOut ? '已售罄' : disabled ? '等待开场' : '立即秒杀' }}</button>
       <div v-if="resultType" class="result" :class="resultType">{{ resultMsg }}</div>
       <div v-if="orderInfo && paymentLeft > 0" class="payment-bar">

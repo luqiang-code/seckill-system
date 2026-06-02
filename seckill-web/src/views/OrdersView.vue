@@ -3,8 +3,7 @@ import { ref, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import { fetchMyOrders, payOrder, ApiError } from '../api'
 import type { OrderInfo } from '../api/types'
-
-const PAYMENT_DEADLINE_MS = 15 * 60 * 1000
+import { PAYMENT_DEADLINE_MS, formatCountdown } from '../api/constants'
 
 const router = useRouter()
 
@@ -67,12 +66,6 @@ function formatTime(ts: string) {
 function paymentLeft(order: OrderInfo) {
   const deadline = new Date(order.createTime).getTime() + PAYMENT_DEADLINE_MS
   return Math.max(0, Math.floor((deadline - Date.now()) / 1000))
-}
-
-function formatCountdown(seconds: number) {
-  const m = Math.floor(seconds / 60)
-  const s = seconds % 60
-  return m + '分' + s + '秒'
 }
 
 async function handlePay(order: OrderInfo) {
