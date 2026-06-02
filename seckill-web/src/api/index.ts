@@ -14,13 +14,13 @@ function getToken(): string | null {
   return localStorage.getItem('token')
 }
 
-async function request<T>(url: string, options?: RequestInit, tokenOverride?: string): Promise<T> {
+async function request<T>(url: string, options?: RequestInit): Promise<T> {
   const headers: Record<string, string> = {
     'Content-Type': 'application/json',
     ...(options?.headers as Record<string, string>),
   }
 
-  const token = tokenOverride ?? getToken()
+  const token = getToken()
   if (token) {
     headers['Authorization'] = `Bearer ${token}`
   }
@@ -28,7 +28,6 @@ async function request<T>(url: string, options?: RequestInit, tokenOverride?: st
   const resp = await fetch(url, { ...options, headers })
 
   if (resp.status === 401) {
-    if (tokenOverride) throw new ApiError(401, '未登录')
     localStorage.removeItem('token')
     localStorage.removeItem('username')
     window.location.hash = '#/login'
@@ -130,8 +129,15 @@ export function fetchRecentOrders(goodsId: number, limit = 20): Promise<{ userId
   return request(`/seckill/orders/${goodsId}?limit=${limit}`)
 }
 
-export function doSeckillWithToken(goodsId: number, token: string): Promise<void> {
-  return request<void>(`/seckill/do/${goodsId}`, { method: 'POST' }, token)
+// For stress testing: use per-user token
+export async function doSeckillWithToken(goodsId: number, token: string): Promise<void> {
+  const resp = await fetch(`/seckill/do/${goodsId}`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
+  })
+  if (resp.status === 429) throw new ApiError(429, '请求太频繁')
+  const body = await resp.json()
+  if (body.code !== 1) throw new ApiError(body.code || 0, body.message || '请求失败')
 }
 
 export function fetchMyOrders(status?: number | null, limit = 50): Promise<OrderInfo[]> {

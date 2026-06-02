@@ -8,9 +8,10 @@ import { useRouter } from 'vue-router'
 import { useAuth } from '../composables/useAuth'
 import { fetchGoods, fetchGoodsDetail, fetchRecentOrders } from '../api'
 import type { Goods } from '../api/types'
-import { WINDOW_DURATION, INTERVAL_DURATION } from '../api/constants'
 
 const router = useRouter()
+const WINDOW_DURATION = 10
+const INTERVAL_DURATION = 25
 
 const { remaining, status, isWindowOpen } = useCountdown(WINDOW_DURATION, INTERVAL_DURATION)
 const { data: goodsList } = usePolling<Goods[]>(fetchGoods, 3000)

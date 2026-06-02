@@ -1,30 +1,36 @@
 <script setup lang="ts">
-import { ref, onMounted, computed } from 'vue'
+import { ref, onMounted, onUnmounted } from 'vue'
+import { computed } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { useCountdown } from '../composables/useCountdown'
 import { useAuth } from '../composables/useAuth'
-import { useSeckill } from '../composables/useSeckill'
-import { fetchGoodsDetail, fetchRecentOrders } from '../api'
+import { fetchGoodsDetail, fetchRecentOrders, doSeckill, fetchResult, payOrder, ApiError } from '../api'
 import { PRODUCT_META } from '../api/types'
-import { WINDOW_DURATION, INTERVAL_DURATION, formatCountdown } from '../api/constants'
+import type { OrderInfo } from '../api/types'
 
 const route = useRoute()
 const router = useRouter()
+const WINDOW_DURATION = 10
+const INTERVAL_DURATION = 25
 
 const { isWindowOpen } = useCountdown(WINDOW_DURATION, INTERVAL_DURATION)
 const { username } = useAuth()
 
 const goodsId = Number(route.params.id)
 
-const {
-  resultType, resultMsg, orderInfo, paymentLeft,
-  handleSeckill, handlePay,
-} = useSeckill(goodsId)
-
 const detail = ref<{ id: number; name: string; price: number; initialStock: number; currentStock: number; sold: number } | null>(null)
 const buyerList = ref<any[]>([])
 const loading = ref(true)
 const errorMsg = ref('')
+
+const PAYMENT_DEADLINE_MS = 15 * 60 * 1000
+const DEBOUNCE_MS = 1000
+const resultType = ref<'success' | 'fail' | 'info' | ''>('')
+const resultMsg = ref('')
+const orderInfo = ref<OrderInfo | null>(null)
+const paymentLeft = ref(0)
+let cooldownUntil = 0
+let paymentTimer: ReturnType<typeof setInterval> | null = null
 
 const soldPct = ref(0)
 const stockPct = ref(100)
@@ -56,14 +62,98 @@ function refreshOrders() {
   }).catch(() => {})
 }
 
-function onSeckill() {
-  handleSeckill(() => {
+function formatCountdown(seconds: number): string {
+  const m = Math.floor(seconds / 60)
+  const s = seconds % 60
+  return m + '分' + s + '秒'
+}
+
+function startPaymentCountdown() {
+  if (!orderInfo.value) return
+  const deadline = new Date(orderInfo.value.createTime).getTime() + PAYMENT_DEADLINE_MS
+  stopPaymentCountdown()
+  paymentTimer = setInterval(() => {
+    const remain = Math.max(0, Math.floor((deadline - Date.now()) / 1000))
+    paymentLeft.value = remain
+    if (remain <= 0) {
+      stopPaymentCountdown()
+      resultType.value = 'fail'
+      resultMsg.value = '订单已超时取消'
+      orderInfo.value = null
+    }
+  }, 200)
+}
+
+function stopPaymentCountdown() {
+  if (paymentTimer) { clearInterval(paymentTimer); paymentTimer = null }
+}
+
+async function handlePay() {
+  if (!orderInfo.value) return
+  try {
+    await payOrder(orderInfo.value.id)
+    resultType.value = 'success'
+    resultMsg.value = '支付成功！订单号: ' + (orderInfo.value.id ?? '')
+    stopPaymentCountdown()
+    paymentLeft.value = 0
+  } catch (e) {
+    resultType.value = 'fail'
+    resultMsg.value = e instanceof ApiError ? e.message : '支付失败'
+  }
+}
+
+async function handleSeckill() {
+  const now = Date.now()
+  if (now < cooldownUntil) return
+  cooldownUntil = now + DEBOUNCE_MS
+  clearResult()
+
+  try {
+    await doSeckill(goodsId)
+    resultType.value = 'success'
+    resultMsg.value = '抢到了！'
+    pollResult()
     loadDetail()
     refreshOrders()
-  })
+  } catch (e) {
+    if (e instanceof ApiError) {
+      switch (e.code) {
+        case 429: resultType.value = 'info'; resultMsg.value = '请求太频繁'; break
+        case 2: resultType.value = 'info'; resultMsg.value = '已抢过'; break
+        case 0: resultType.value = 'fail'; resultMsg.value = '已售罄'; break
+        default: resultType.value = 'fail'; resultMsg.value = e.message
+      }
+    } else {
+      resultType.value = 'fail'; resultMsg.value = '网络错误'
+    }
+  }
+}
+
+function pollResult() {
+  const check = () => {
+    fetchResult(goodsId)
+      .then(order => {
+        orderInfo.value = order
+        resultMsg.value = '订单号: ' + order.id
+        startPaymentCountdown()
+      })
+      .catch(err => {
+        if (err instanceof ApiError && err.code === 3) setTimeout(check, 500)
+      })
+  }
+  setTimeout(check, 300)
+}
+
+function clearResult() {
+  resultType.value = ''
+  resultMsg.value = ''
+  orderInfo.value = null
+  paymentLeft.value = 0
+  stopPaymentCountdown()
 }
 
 onMounted(loadDetail)
+onUnmounted(() => stopPaymentCountdown())
 </script>
 
 <template>
@@ -109,7 +199,7 @@ onMounted(loadDetail)
           </div>
 
           <div class="seckill-section">
-            <button class="seckill-btn" :disabled="!isWindowOpen" @click="onSeckill">
+            <button class="seckill-btn" :disabled="!isWindowOpen" @click="handleSeckill">
               {{ isWindowOpen ? '⚡ 立即秒杀' : '等待开场' }}
             </button>
             <div v-if="resultType" class="result" :class="resultType">{{ resultMsg }}</div>

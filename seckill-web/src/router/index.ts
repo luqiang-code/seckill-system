@@ -1,5 +1,4 @@
 import { createRouter, createWebHashHistory } from 'vue-router'
-import { getToken } from '../composables/useAuth'
 
 const router = createRouter({
   history: createWebHashHistory(),
@@ -37,7 +36,7 @@ const router = createRouter({
 })
 
 router.beforeEach((to) => {
-  const token = getToken()
+  const token = localStorage.getItem('token')
   if (to.meta.requiresAuth && !token) {
     return { name: 'login', query: { reason: 'auth' } }
   }
