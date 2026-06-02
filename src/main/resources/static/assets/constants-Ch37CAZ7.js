@@ -1,0 +1,1 @@
+var e=900*1e3,t=1e3;function n(e){let t=Math.floor(e/60),n=e%60;return t+`分`+n+`秒`}export{e as n,n as r,t};
