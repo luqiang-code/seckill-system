@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, onMounted } from 'vue'
+import { ref, onMounted, onUnmounted } from 'vue'
 import { useRouter } from 'vue-router'
 import { fetchMyOrders, payOrder, ApiError } from '../api'
 import type { OrderInfo } from '../api/types'
@@ -22,6 +22,8 @@ const tabs = [
 const activeTab = ref(STATUS_ALL)
 const orders = ref<OrderInfo[]>([])
 const loading = ref(true)
+const now = ref(Date.now())
+let timer: ReturnType<typeof setInterval> | null = null
 
 const statusLabel = (s: number) => {
   switch (s) {
@@ -65,7 +67,7 @@ function formatTime(ts: string) {
 
 function paymentLeft(order: OrderInfo) {
   const deadline = new Date(order.createTime).getTime() + PAYMENT_DEADLINE_MS
-  return Math.max(0, Math.floor((deadline - Date.now()) / 1000))
+  return Math.max(0, Math.floor((deadline - now.value) / 1000))
 }
 
 async function handlePay(order: OrderInfo) {
@@ -77,7 +79,14 @@ async function handlePay(order: OrderInfo) {
   }
 }
 
-onMounted(loadOrders)
+onMounted(() => {
+  loadOrders()
+  timer = setInterval(() => { now.value = Date.now() }, 200)
+})
+
+onUnmounted(() => {
+  if (timer) { clearInterval(timer); timer = null }
+})
 </script>
 
 <template>
