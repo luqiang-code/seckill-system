@@ -15,7 +15,8 @@ export function useSeckill(goodsId: MaybeRefOrGetter<number>) {
     if (!orderInfo.value) return
     const deadline = new Date(orderInfo.value.createTime).getTime() + PAYMENT_DEADLINE_MS
     stopPaymentCountdown()
-    paymentTimer = setInterval(() => {
+
+    function tick() {
       const remain = Math.max(0, Math.floor((deadline - Date.now()) / 1000))
       paymentLeft.value = remain
       if (remain <= 0) {
@@ -23,13 +24,16 @@ export function useSeckill(goodsId: MaybeRefOrGetter<number>) {
         resultType.value = 'fail'
         resultMsg.value = '订单已超时取消'
         orderInfo.value = null
+        return
       }
-    }, 200)
+      paymentTimer = setTimeout(tick, 200)
+    }
+    tick()
   }
 
   function stopPaymentCountdown() {
     if (paymentTimer) {
-      clearInterval(paymentTimer)
+      clearTimeout(paymentTimer)
       paymentTimer = null
     }
   }
