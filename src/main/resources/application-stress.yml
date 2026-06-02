@@ -1,0 +1,10 @@
+# ========== 压测环境 - 隔离配置 ==========
+spring:
+  datasource:
+    url: jdbc:mysql://127.0.0.1:3307/seckill_stress?useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=Asia/Shanghai&rewriteBatchedStatements=true&characterEncoding=UTF-8
+  sql:
+    init:
+      mode: never
+  jpa:
+    hibernate:
+      ddl-auto: none
