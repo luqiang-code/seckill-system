@@ -23,7 +23,8 @@ const {
   handleSeckill, handlePay,
 } = useSeckill(() => props.goods.id)
 
-const meta = computed(() => PRODUCT_META[props.goods.id] ?? { emoji: '📦', color: '#f5f5f5' })
+const meta = computed(() => PRODUCT_META[props.goods.id] ?? { emoji: '📦', color: '#3d2820', name: props.goods.name })
+const displayName = computed(() => meta.value.name || props.goods.name)
 const stockPct = computed(() => props.initialStock > 0
   ? Math.round((props.goods.stock / props.initialStock) * 100)
   : 0)
@@ -39,242 +40,334 @@ function goDetail() {
 </script>
 
 <template>
-  <div class="goods-card" :class="{ 'sold-out': isSoldOut }">
-    <div class="icon clickable" :style="{ background: meta.color }" @click="goDetail">
-      {{ meta.emoji }}
+  <div class="shop-card" :class="{ 'sold-out': isSoldOut }">
+    <div class="shop-sign">
+      <div class="sign-hanger"></div>
+      <div class="sign-plate">
+        <div class="sign-emoji" :style="{ background: meta.color }" @click="goDetail">
+          {{ meta.emoji }}
+        </div>
+        <div class="sign-info" @click="goDetail">
+          <div class="sign-name">{{ displayName }}</div>
+          <div class="sign-hint">✦ 轻敲查看详情 ✦</div>
+        </div>
+      </div>
     </div>
-    <div class="info clickable" @click="goDetail">
-      <div class="name">{{ goods.name }}</div>
-      <div class="view-hint">点击查看详情 →</div>
-      <div class="price"><span class="unit">¥</span>{{ goods.price.toLocaleString() }}</div>
-      <div class="stock-section">
-        <div class="stock-bar-bg">
-          <div class="stock-bar-fill" :style="{ width: stockPct + '%' }" :class="{ low: stockPct < 20 }"></div>
+
+    <div class="shop-body">
+      <div class="price-tag">
+        <span class="galleon-icon">🪙</span>
+        <span class="price-num">{{ goods.price.toLocaleString() }}</span>
+        <span class="price-label">加隆</span>
+      </div>
+
+      <div class="stock-area">
+        <div class="stock-cauldron">
+          <div class="cauldron-track">
+            <div class="cauldron-fill" :style="{ width: stockPct + '%' }" :class="{ low: stockPct < 20 }">
+              <div class="cauldron-sparkle"></div>
+            </div>
+          </div>
         </div>
         <div class="stock-text">
-          剩余 <span class="num">{{ goods.stock }}</span> 件
+          存货 <span class="stock-num">{{ goods.stock }}</span> 件
+        </div>
+      </div>
+
+      <div class="spell-area">
+        <button
+          class="spell-btn"
+          :disabled="disabled || isSoldOut"
+          @click="onSeckill"
+        >
+          <span class="spell-icon">⚡</span>
+          {{ isSoldOut ? '魔药售罄' : disabled ? '等待开门' : '念咒抢购' }}
+        </button>
+        <div v-if="resultType" class="spell-result" :class="resultType">{{ resultMsg }}</div>
+        <div v-if="orderInfo && paymentLeft > 0" class="payment-bar">
+          <div class="payment-note">
+            请在 <span class="countdown-num">{{ formatCountdown(paymentLeft) }}</span> 内献上金币
+          </div>
+          <button class="pay-btn" @click="handlePay">🪙 金币支付</button>
         </div>
       </div>
     </div>
-    <div class="action">
-      <button
-        class="btn"
-        :disabled="disabled || isSoldOut"
-        @click="onSeckill"
-      >{{ isSoldOut ? '已售罄' : disabled ? '等待开场' : '立即秒杀' }}</button>
-      <div v-if="resultType" class="result" :class="resultType">{{ resultMsg }}</div>
-      <div v-if="orderInfo && paymentLeft > 0" class="payment-bar">
-        <div class="payment-countdown">请在 <span class="countdown-num">{{ formatCountdown(paymentLeft) }}</span> 内完成支付</div>
-        <button class="pay-btn" @click="handlePay">立即支付</button>
-      </div>
-    </div>
-    <div v-if="isSoldOut" class="soldout-overlay">
-      <span>已售罄</span>
+
+    <div v-if="isSoldOut" class="soldout-seal">
+      <span>售罄</span>
     </div>
   </div>
 </template>
 
 <style scoped>
-.goods-card {
-  background: #fff;
-  border-radius: 12px;
-  padding: 24px;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
-  display: flex;
-  align-items: center;
-  gap: 20px;
+.shop-card {
   position: relative;
+  background: linear-gradient(180deg, #2c1f14 0%, #1e1610 100%);
+  border: 2px solid #5c0000;
+  border-radius: 2px;
   overflow: hidden;
-  transition: transform 0.15s;
+  transition: transform 0.2s, box-shadow 0.2s;
 }
 
-.goods-card:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
+.shop-card:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 8px 30px rgba(116, 0, 1, 0.3), 0 0 0 1px rgba(212, 175, 55, 0.2);
 }
 
-.goods-card.sold-out {
-  opacity: 0.7;
+.shop-card.sold-out {
+  opacity: 0.6;
 }
 
-.icon {
-  width: 64px;
-  height: 64px;
-  border-radius: 14px;
-  display: flex;
+/* ---- shop sign ---- */
+.shop-sign {
+  padding: 20px 20px 0;
+  text-align: center;
+}
+
+.sign-hanger {
+  width: 40px; height: 6px;
+  background: #5c0000;
+  border-radius: 3px;
+  margin: 0 auto 8px;
+}
+
+.sign-plate {
+  background: linear-gradient(180deg, #f5e6cc 0%, #ebd5b3 100%);
+  border: 2px solid #8b6914;
+  border-radius: 2px;
+  padding: 16px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.3), inset 0 1px 0 rgba(255,255,255,0.3);
+  cursor: pointer;
+  transition: box-shadow 0.2s;
+}
+
+.sign-plate:hover {
+  box-shadow: 0 4px 16px rgba(212, 175, 55, 0.3), inset 0 1px 0 rgba(255,255,255,0.3);
+}
+
+.sign-emoji {
+  width: 56px; height: 56px;
+  border-radius: 8px;
+  display: inline-flex;
   align-items: center;
   justify-content: center;
-  font-size: 30px;
-  flex-shrink: 0;
-}
-
-.info {
-  flex: 1;
-  min-width: 0;
-}
-
-.name {
-  font-size: 18px;
-  font-weight: 600;
-  color: #333;
-  margin-bottom: 4px;
-}
-
-.view-hint {
-  font-size: 12px;
-  color: #ccc;
-  margin-bottom: 2px;
-}
-
-.clickable { cursor: pointer; }
-.clickable:hover .name { color: #e74c3c; }
-.clickable:hover .view-hint { color: #e74c3c; }
-
-.price {
-  font-size: 22px;
-  font-weight: 700;
-  color: #e74c3c;
-  margin-bottom: 10px;
-}
-
-.price .unit {
-  font-size: 14px;
-}
-
-.stock-section {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-}
-
-.stock-bar-bg {
-  flex: 1;
-  height: 6px;
-  border-radius: 3px;
-  background: #eee;
-  max-width: 120px;
-}
-
-.stock-bar-fill {
-  height: 100%;
-  border-radius: 3px;
-  background: linear-gradient(90deg, #27ae60, #2ecc71);
-  transition: width 0.3s;
-}
-
-.stock-bar-fill.low {
-  background: linear-gradient(90deg, #e74c3c, #f39c12);
-}
-
-.stock-text {
-  font-size: 13px;
-  color: #999;
-  white-space: nowrap;
-}
-
-.stock-text .num {
-  color: #e74c3c;
-  font-weight: 600;
-}
-
-.action {
-  flex-shrink: 0;
-}
-
-.btn {
-  width: 120px;
-  padding: 12px 0;
-  border: none;
-  border-radius: 8px;
-  font-size: 16px;
-  font-weight: 600;
-  cursor: pointer;
-  transition: all 0.15s;
-  color: #fff;
-  background: #e74c3c;
-}
-
-.btn:active:not(:disabled) {
-  transform: scale(0.96);
-}
-
-.btn:disabled {
-  background: #ccc;
-  cursor: not-allowed;
-}
-
-.result {
-  font-size: 13px;
-  margin-top: 6px;
-  text-align: center;
-  font-weight: 600;
-}
-
-.result.success { color: #27ae60; }
-.result.fail { color: #e74c3c; }
-.result.info { color: #2980b9; }
-
-.payment-bar {
-  margin-top: 10px;
-  padding: 10px 12px;
-  background: #fff8e1;
-  border: 1px solid #ffc107;
-  border-radius: 8px;
-  text-align: center;
-}
-
-.payment-countdown {
-  font-size: 13px;
-  color: #e65100;
+  font-size: 28px;
+  border: 2px solid #8b6914;
   margin-bottom: 8px;
 }
 
-.countdown-num {
+.sign-name {
+  font-family: 'Pirata One', serif;
+  font-size: 20px;
+  color: #3d1c00;
+  letter-spacing: 0.05em;
+}
+
+.sign-hint {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 12px;
+  color: #8b7355;
+  margin-top: 4px;
+  font-style: italic;
+}
+
+/* ---- body ---- */
+.shop-body {
+  padding: 16px 20px 20px;
+}
+
+.price-tag {
+  display: flex;
+  align-items: baseline;
+  gap: 6px;
+  margin-bottom: 14px;
+}
+
+.galleon-icon { font-size: 18px; }
+
+.price-num {
+  font-family: 'Pirata One', serif;
+  font-size: 26px;
+  color: #D4AF37;
+  text-shadow: 0 0 8px rgba(212, 175, 55, 0.3);
+}
+
+.price-label {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 14px;
+  color: #b8a080;
+  font-style: italic;
+}
+
+/* ---- stock ---- */
+.stock-area {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 16px;
+}
+
+.stock-cauldron { flex: 1; }
+
+.cauldron-track {
+  height: 8px;
+  background: #1a1008;
+  border: 1px solid #3d2820;
+  border-radius: 4px;
+  overflow: hidden;
+}
+
+.cauldron-fill {
+  height: 100%;
+  border-radius: 3px;
+  background: linear-gradient(90deg, #1a5632, #2ecc71);
+  transition: width 0.4s;
+  position: relative;
+}
+
+.cauldron-fill.low {
+  background: linear-gradient(90deg, #740001, #c0392b);
+}
+
+.cauldron-sparkle {
+  position: absolute;
+  top: 0; right: 0; bottom: 0;
+  width: 20px;
+  background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2));
+}
+
+.stock-text {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 13px;
+  color: #8b7355;
+  white-space: nowrap;
+  font-style: italic;
+}
+
+.stock-num {
+  color: #D4AF37;
   font-weight: 700;
-  font-variant-numeric: tabular-nums;
+  font-style: normal;
+}
+
+/* ---- spell button ---- */
+.spell-area {
+  text-align: center;
+}
+
+.spell-btn {
+  width: 100%;
+  padding: 14px 0;
+  border: none;
+  border-radius: 2px;
+  font-family: 'Pirata One', serif;
+  font-size: 20px;
+  font-weight: 400;
+  letter-spacing: 0.06em;
+  cursor: pointer;
+  color: #D4AF37;
+  background: linear-gradient(180deg, #740001 0%, #5c0000 100%);
+  border: 1px solid #8b0000;
+  transition: all 0.15s;
+  text-shadow: 0 1px 2px rgba(0,0,0,0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+}
+
+.spell-icon { font-size: 18px; }
+
+.spell-btn:hover:not(:disabled) {
+  background: linear-gradient(180deg, #8b0000 0%, #740001 100%);
+  box-shadow: 0 0 20px rgba(116, 0, 1, 0.5);
+}
+
+.spell-btn:active:not(:disabled) {
+  transform: scale(0.97);
+}
+
+.spell-btn:disabled {
+  background: #3d2820;
+  color: #665540;
+  border-color: #3d2820;
+  cursor: not-allowed;
+  text-shadow: none;
+}
+
+/* ---- result ---- */
+.spell-result {
+  font-family: 'Pirata One', serif;
+  font-size: 15px;
+  margin-top: 10px;
+  letter-spacing: 0.04em;
+}
+
+.spell-result.success { color: #2ecc71; }
+.spell-result.fail    { color: #e74c3c; }
+.spell-result.info    { color: #5dade2; }
+
+/* ---- payment ---- */
+.payment-bar {
+  margin-top: 12px;
+  padding: 12px;
+  background: linear-gradient(180deg, #2c1f14, #1e1610);
+  border: 1px solid #D4AF37;
+  border-radius: 2px;
+}
+
+.payment-note {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 14px;
+  color: #c8b898;
+  margin-bottom: 10px;
+  font-style: italic;
+}
+
+.countdown-num {
+  font-family: 'Pirata One', serif;
+  color: #D4AF37;
+  font-weight: 400;
+  font-style: normal;
 }
 
 .pay-btn {
-  padding: 6px 24px;
-  border: none;
-  border-radius: 6px;
-  font-size: 14px;
-  font-weight: 600;
+  padding: 8px 28px;
+  border: 1px solid #8b6914;
+  border-radius: 2px;
+  font-family: 'Pirata One', serif;
+  font-size: 16px;
+  letter-spacing: 0.05em;
   cursor: pointer;
-  color: #fff;
-  background: #ff9800;
+  color: #3d1c00;
+  background: linear-gradient(180deg, #D4AF37, #b8941a);
   transition: all 0.15s;
+}
+
+.pay-btn:hover {
+  box-shadow: 0 0 12px rgba(212, 175, 55, 0.4);
 }
 
 .pay-btn:active {
   transform: scale(0.96);
 }
 
-.soldout-overlay {
+/* ---- sold out seal ---- */
+.soldout-seal {
   position: absolute;
-  top: 12px;
-  right: -28px;
-  background: #999;
-  color: #fff;
-  font-size: 12px;
-  font-weight: 700;
-  padding: 3px 32px;
+  top: 16px; right: -32px;
+  background: #740001;
+  color: #D4AF37;
+  font-family: 'Pirata One', serif;
+  font-size: 14px;
+  letter-spacing: 0.1em;
+  padding: 4px 36px;
   transform: rotate(45deg);
+  border: 1px solid #D4AF37;
 }
 
 @media (max-width: 500px) {
-  .goods-card {
-    flex-direction: column;
-    text-align: center;
-  }
-  .stock-section {
-    justify-content: center;
-  }
-  .action {
-    width: 100%;
-  }
-  .btn {
-    width: 100%;
-  }
+  .shop-body { text-align: center; }
+  .stock-area { justify-content: center; }
 }
 </style>
