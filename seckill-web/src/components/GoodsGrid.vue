@@ -14,7 +14,7 @@ const emit = defineEmits<{
 </script>
 
 <template>
-  <div class="goods-grid">
+  <div class="diagon-grid">
     <GoodsCard
       v-for="g in goodsList"
       :key="g.id"
@@ -27,17 +27,17 @@ const emit = defineEmits<{
 </template>
 
 <style scoped>
-.goods-grid {
-  max-width: 960px;
-  margin: 20px auto;
+.diagon-grid {
+  max-width: 1000px;
+  margin: 24px auto;
   padding: 0 16px;
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(420px, 1fr));
-  gap: 16px;
+  grid-template-columns: repeat(auto-fill, minmax(440px, 1fr));
+  gap: 20px;
 }
 
-@media (max-width: 900px) {
-  .goods-grid {
+@media (max-width: 920px) {
+  .diagon-grid {
     grid-template-columns: 1fr;
   }
 }

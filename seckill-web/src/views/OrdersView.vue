@@ -13,10 +13,10 @@ const STATUS_PAID = 1
 const STATUS_CANCELLED = 2
 
 const tabs = [
-  { label: '全部', value: STATUS_ALL },
-  { label: '待支付', value: STATUS_PENDING },
-  { label: '已支付', value: STATUS_PAID },
-  { label: '已取消', value: STATUS_CANCELLED },
+  { label: '全部契约', value: STATUS_ALL },
+  { label: '待献金币', value: STATUS_PENDING },
+  { label: '金币已献', value: STATUS_PAID },
+  { label: '已解除', value: STATUS_CANCELLED },
 ] as const
 
 const activeTab = ref(STATUS_ALL)
@@ -27,9 +27,9 @@ let timer: ReturnType<typeof setInterval> | null = null
 
 const statusLabel = (s: number) => {
   switch (s) {
-    case STATUS_PENDING: return '待支付'
-    case STATUS_PAID: return '已支付'
-    case STATUS_CANCELLED: return '已取消'
+    case STATUS_PENDING: return '待献金币'
+    case STATUS_PAID: return '金币已献'
+    case STATUS_CANCELLED: return '已解除'
     default: return '未知'
   }
 }
@@ -75,7 +75,7 @@ async function handlePay(order: OrderInfo) {
     await payOrder(order.id)
     order.status = 1
   } catch (e) {
-    alert(e instanceof ApiError ? e.message : '支付失败')
+    alert(e instanceof ApiError ? e.message : '魔法支付失败')
   }
 }
 
@@ -90,10 +90,10 @@ onUnmounted(() => {
 </script>
 
 <template>
-  <div class="page">
-    <header class="header">
-      <button class="back-btn" @click="router.push('/')">← 返回</button>
-      <h1>我的订单</h1>
+  <div class="contracts-page">
+    <header class="contracts-header">
+      <button class="back-btn" @click="router.push('/')">← 返回对角巷</button>
+      <h1>我的契约</h1>
       <div class="spacer"></div>
     </header>
 
@@ -107,33 +107,34 @@ onUnmounted(() => {
       >{{ t.label }}</button>
     </div>
 
-    <div v-if="loading" class="state-box">加载中...</div>
-    <div v-else-if="orders.length === 0" class="state-box empty">暂无订单</div>
+    <div v-if="loading" class="state-box">✦ 翻阅契约中...</div>
+    <div v-else-if="orders.length === 0" class="state-box empty">暂无魔法契约</div>
 
-    <div v-else class="order-list">
-      <div v-for="o in orders" :key="o.id" class="order-card">
-        <div class="order-head">
+    <div v-else class="contract-list">
+      <div v-for="o in orders" :key="o.id" class="contract-scroll">
+        <div class="scroll-seal">⚡</div>
+        <div class="scroll-head">
           <span class="goods-name">{{ o.goodsName }}</span>
           <span class="status-badge" :class="statusClass(o.status)">{{ statusLabel(o.status) }}</span>
         </div>
-        <div class="order-body">
-          <div class="order-info">
-            <span>订单号: {{ o.id }}</span>
-            <span>时间: {{ formatTime(o.createTime) }}</span>
+        <div class="scroll-body">
+          <div class="scroll-info">
+            <span>契约编号: {{ o.id }}</span>
+            <span>立契时间: {{ formatTime(o.createTime) }}</span>
             <span v-if="o.status === 0 && paymentLeft(o) > 0" class="countdown-tip">
-              剩余 <strong>{{ formatCountdown(paymentLeft(o)) }}</strong>
+              余 <strong>{{ formatCountdown(paymentLeft(o)) }}</strong>
             </span>
           </div>
-          <div class="order-actions">
+          <div class="scroll-actions">
             <button
               v-if="o.status === 0"
               class="pay-btn"
               @click="handlePay(o)"
-            >立即支付</button>
+            >🪙 献金币</button>
             <button
               class="detail-btn"
               @click="router.push(`/goods/${o.goodsId}`)"
-            >查看商品</button>
+            >查看物品</button>
           </div>
         </div>
       </div>
@@ -142,75 +143,204 @@ onUnmounted(() => {
 </template>
 
 <style scoped>
-.page { min-height: 100vh; background: #f5f5f5; padding-bottom: 40px; }
+.contracts-page {
+  min-height: 100vh;
+  padding-bottom: 40px;
+}
 
-.header {
-  background: linear-gradient(135deg, #e74c3c, #c0392b);
-  color: #fff;
+/* header */
+.contracts-header {
+  background: linear-gradient(180deg, #1e1610, #2c1f14);
+  border-bottom: 2px solid #5c0000;
+  color: #D4AF37;
   padding: 16px 20px;
   display: flex;
   align-items: center;
   justify-content: space-between;
 }
-.header h1 { font-size: 18px; margin: 0; }
-.spacer { width: 60px; }
+
+.contracts-header h1 {
+  font-family: 'Pirata One', serif;
+  font-size: 22px;
+  letter-spacing: 0.12em;
+  margin: 0;
+}
+
+.spacer { width: 80px; }
+
 .back-btn {
-  background: none; border: none; color: #fff; font-size: 15px;
-  cursor: pointer; padding: 4px 0;
+  background: none;
+  border: 1px solid #5c0000;
+  border-radius: 2px;
+  color: #c8b898;
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 14px;
+  cursor: pointer;
+  padding: 6px 14px;
+  transition: all 0.15s;
 }
 
+.back-btn:hover {
+  border-color: #D4AF37;
+  color: #D4AF37;
+}
+
+/* tabs */
 .tabs {
-  max-width: 600px; margin: 16px auto 0; padding: 0 16px;
-  display: flex; gap: 8px;
+  max-width: 600px;
+  margin: 16px auto 0;
+  padding: 0 16px;
+  display: flex;
+  gap: 8px;
 }
+
 .tab-btn {
-  flex: 1; padding: 10px 0; border: none; border-radius: 8px;
-  font-size: 14px; font-weight: 600; cursor: pointer;
-  background: #fff; color: #666; transition: all 0.15s;
+  flex: 1;
+  padding: 10px 0;
+  border: 1px solid #3d2820;
+  border-radius: 2px;
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 14px;
+  cursor: pointer;
+  background: #1e1610;
+  color: #8b7355;
+  transition: all 0.15s;
 }
+
 .tab-btn.active {
-  background: #e74c3c; color: #fff;
+  background: #5c0000;
+  border-color: #8b0000;
+  color: #D4AF37;
 }
 
-.state-box { text-align: center; padding: 60px 20px; color: #999; font-size: 15px; }
-.state-box.empty { color: #ccc; }
+.tab-btn:hover:not(.active) {
+  border-color: #D4AF37;
+  color: #c8b898;
+}
 
-.order-list {
-  max-width: 600px; margin: 16px auto 0; padding: 0 16px;
-  display: flex; flex-direction: column; gap: 12px;
+/* state */
+.state-box {
+  text-align: center;
+  padding: 60px 20px;
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 18px;
+  color: #8b7355;
+  font-style: italic;
 }
-.order-card {
-  background: #fff; border-radius: 12px; padding: 16px;
-  box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+.state-box.empty { color: #665540; }
+
+/* contract list */
+.contract-list {
+  max-width: 600px;
+  margin: 16px auto 0;
+  padding: 0 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
 }
-.order-head {
-  display: flex; justify-content: space-between; align-items: center;
+
+.contract-scroll {
+  background: linear-gradient(180deg, #2c1f14, #1e1610);
+  border: 1px solid #3d2820;
+  border-radius: 4px;
+  padding: 18px;
+  position: relative;
+}
+
+.scroll-seal {
+  position: absolute;
+  top: 12px;
+  right: 16px;
+  font-size: 20px;
+  opacity: 0.3;
+}
+
+.scroll-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
   margin-bottom: 10px;
 }
-.goods-name { font-size: 16px; font-weight: 600; color: #333; }
-.status-badge {
-  font-size: 12px; padding: 3px 10px; border-radius: 10px; font-weight: 600;
-}
-.status-badge.pending { background: #fff3e0; color: #e65100; }
-.status-badge.paid { background: #e8f5e9; color: #2e7d32; }
-.status-badge.cancelled { background: #f5f5f5; color: #999; }
 
-.order-body {
-  display: flex; justify-content: space-between; align-items: center;
+.goods-name {
+  font-family: 'Pirata One', serif;
+  font-size: 18px;
+  color: #D4AF37;
+  letter-spacing: 0.05em;
 }
-.order-info { font-size: 13px; color: #999; display: flex; flex-direction: column; gap: 2px; }
-.countdown-tip { color: #e65100; }
-.countdown-tip strong { font-weight: 700; }
-.order-actions { display: flex; gap: 8px; align-items: center; }
+
+.status-badge {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 12px;
+  padding: 3px 10px;
+  border-radius: 2px;
+  font-weight: 600;
+}
+
+.status-badge.pending   { background: rgba(212, 175, 55, 0.1); color: #D4AF37; border: 1px solid rgba(212,175,55,0.3); }
+.status-badge.paid      { background: rgba(46, 204, 113, 0.1); color: #2ecc71; border: 1px solid rgba(46,204,113,0.3); }
+.status-badge.cancelled { background: rgba(102, 85, 64, 0.2); color: #665540; border: 1px solid #3d2820; }
+
+.scroll-body {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.scroll-info {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 13px;
+  color: #8b7355;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  font-style: italic;
+}
+
+.countdown-tip { color: #D4AF37; }
+.countdown-tip strong { font-family: 'Pirata One', serif; font-style: normal; }
+
+.scroll-actions {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+}
+
 .pay-btn {
-  padding: 6px 16px; border: none; border-radius: 6px;
-  background: #ff9800; font-size: 13px; font-weight: 600;
-  color: #fff; cursor: pointer; white-space: nowrap;
-}
-.pay-btn:active { transform: scale(0.96); }
-.detail-btn {
-  padding: 6px 16px; border: 1px solid #e74c3c; border-radius: 6px;
-  background: #fff; font-size: 13px; color: #e74c3c; cursor: pointer;
+  padding: 6px 16px;
+  border: 1px solid #8b6914;
+  border-radius: 2px;
+  font-family: 'Pirata One', serif;
+  font-size: 14px;
+  letter-spacing: 0.04em;
+  cursor: pointer;
+  color: #3d1c00;
+  background: linear-gradient(180deg, #D4AF37, #b8941a);
   white-space: nowrap;
+  transition: all 0.15s;
+}
+
+.pay-btn:hover {
+  box-shadow: 0 0 12px rgba(212, 175, 55, 0.3);
+}
+
+.pay-btn:active { transform: scale(0.96); }
+
+.detail-btn {
+  padding: 6px 16px;
+  border: 1px solid #5c0000;
+  border-radius: 2px;
+  background: #1e1610;
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 13px;
+  color: #c8b898;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: all 0.15s;
+}
+
+.detail-btn:hover {
+  border-color: #D4AF37;
+  color: #D4AF37;
 }
 </style>
