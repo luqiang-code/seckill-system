@@ -34,9 +34,14 @@ build/
 
 ### JMeter ###
 jmeter/result.jtl
+jmeter/results.jtl
+jmeter/report/
 jmeter/*.log
 *.log
 tokens.csv
+
+### Understand Anything ###
+.understand-anything/
 
 ### macOS ###
 .DS_Store
