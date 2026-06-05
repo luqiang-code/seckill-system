@@ -18,7 +18,7 @@ const remainPct = ref(100)
 const qpsRatio = ref(0)
 const statusText = ref('待命中')
 const statusState = ref<'idle' | 'running'>('idle')
-const logLines = ref<string[]>(['等待启动魔法压测...'])
+const logLines = ref<string[]>(['等待启动压测...'])
 const startDisabled = ref(false)
 
 let testRunning = false
@@ -28,6 +28,7 @@ let lastReqCount = 0
 let lastQpsTime = 0
 let startTime = 0
 
+// Initial stock fetch
 fetchStock(1).then(v => {
   stock.value = v
   initialStock = v
@@ -61,7 +62,7 @@ function monitor() {
     }
 
     if (v <= 0 && s >= initialStock) {
-      addLog(`[魔药售罄] 耗时 ${elapsed}s | 咒语 ${reqCount.value} | 存货 ${v}`)
+      addLog(`[售罄] 耗时 ${elapsed}s | 请求 ${reqCount.value} | 库存 ${v}`)
     }
   })
 }
@@ -70,14 +71,14 @@ async function startTest() {
   if (testRunning) return
   testRunning = true
   startDisabled.value = true
-  statusText.value = '咒语施放中...'
+  statusText.value = '压测中...'
   statusState.value = 'running'
 
   reqCount.value = 0
   lastReqCount = 0
   lastQpsTime = Date.now()
   logLines.value = []
-  addLog(`[施法开始] 巫师=${threads.value} 时长=${duration.value}s`)
+  addLog(`[启动] 并发=${threads.value} 时长=${duration.value}s`)
 
   startTime = Date.now()
   const currentStock = stock.value
@@ -104,18 +105,18 @@ async function startTest() {
   const finalStock = await fetchStock(1)
   stock.value = finalStock
 
-  addLog(`[咒语完成] 总咒语数=${reqCount.value} 最终存货=${finalStock}`)
+  addLog(`[完成] 总请求=${reqCount.value} 最终库存=${finalStock}`)
 }
 
 async function runUser(userIdx: number, endTime: number) {
-  const userId = 'wizard_' + userIdx + '_' + Date.now()
+  const userId = 'stress_' + userIdx + '_' + Date.now()
   const { token } = await getTestToken(userId)
   while (Date.now() < endTime) {
     try {
       await doSeckillWithToken(1, token)
       reqCount.value++
     } catch {
-      // ignore
+      // ignore errors during stress test
     }
     await new Promise(r => setTimeout(r, Math.random() * 50))
   }
@@ -136,7 +137,7 @@ function resetView() {
   soldPct.value = 0
   remainPct.value = 100
   qpsRatio.value = 0
-  logLines.value = ['等待启动魔法压测...']
+  logLines.value = ['等待启动压测...']
 
   fetchStock(1).then(v => {
     stock.value = v
@@ -150,41 +151,33 @@ onUnmounted(() => {
 </script>
 
 <template>
-  <div class="ministry-page">
-    <header class="ministry-header">
-      <h1>魔法部 · 监控室</h1>
-      <div class="ministry-sub">Department of Mysteries · 实时监控</div>
-    </header>
+  <div class="page">
+    <h1>秒杀压测监控面板</h1>
+    <div class="subtitle">实时监控 Redis 库存 & 请求状态</div>
 
     <div class="controls">
-      <div class="control-group">
-        <label>🧙 巫师数</label>
-        <input v-model.number="threads" type="number" min="10" max="5000">
-      </div>
-      <div class="control-group">
-        <label>⏳ 咒语时长(s)</label>
-        <input v-model.number="duration" type="number" min="1" max="60">
-      </div>
+      <label>并发数</label>
+      <input v-model.number="threads" type="number" min="10" max="5000">
+      <label>压测时长(s)</label>
+      <input v-model.number="duration" type="number" min="1" max="60">
       <button
-        class="btn-cast"
+        class="btn btn-start"
         :disabled="startDisabled"
         @click="startTest"
-      >
-        <span class="btn-spark">⚡</span> 施放咒语
-      </button>
-      <button class="btn-reset" @click="resetView">🔄 重置</button>
+      >启动压测</button>
+      <button class="btn btn-reset" @click="resetView">重置</button>
       <span class="status-badge" :class="statusState">{{ statusText }}</span>
     </div>
 
-    <div class="stat-grid">
-      <StatCard label="存货量" :value="stock" color="green" />
+    <div class="grid">
+      <StatCard label="剩余库存" :value="stock" color="green" />
       <StatCard label="已售出" :value="sold" color="red" />
-      <StatCard label="咒语总数" :value="reqCount" color="blue" />
-      <StatCard label="每秒咒语" :value="qps" color="yellow" />
+      <StatCard label="累计请求" :value="reqCount" color="blue" />
+      <StatCard label="QPS" :value="qps" color="yellow" />
     </div>
 
-    <div class="chart-section">
-      <h3 class="chart-title">🔮 存货消耗进度</h3>
+    <div class="chart-container">
+      <h3>库存消耗进度</h3>
       <ProgressBar
         label="已售出"
         :current="soldPct"
@@ -193,7 +186,7 @@ onUnmounted(() => {
         color-class="sold"
       />
       <ProgressBar
-        label="存货剩余"
+        label="剩余库存"
         :current="remainPct"
         suffix="%"
         :max="100"
@@ -201,10 +194,10 @@ onUnmounted(() => {
       />
     </div>
 
-    <div class="chart-section">
-      <h3 class="chart-title">⚡ 魔咒强度 (QPS / 5000)</h3>
+    <div class="chart-container">
+      <h3>QPS 实时曲线</h3>
       <ProgressBar
-        label="当前魔咒强度"
+        label="当前 QPS / 限流阈值 5000"
         :current="qpsRatio"
         suffix="%"
         :max="100"
@@ -217,135 +210,113 @@ onUnmounted(() => {
 </template>
 
 <style scoped>
-.ministry-page {
+.page {
+  background: #1a1a2e;
+  color: #eee;
   min-height: 100vh;
-  padding-bottom: 40px;
+  padding: 30px;
 }
 
-.ministry-header {
-  background: linear-gradient(180deg, #0d1b3e, #122550);
-  border-bottom: 2px solid #2c1050;
-  padding: 28px 20px;
+h1 {
   text-align: center;
+  margin-bottom: 8px;
+  font-size: 24px;
 }
 
-.ministry-header h1 {
-  font-family: 'Pirata One', serif;
-  font-size: 32px;
-  color: #5dade2;
-  letter-spacing: 0.1em;
-  text-shadow: 0 0 20px rgba(93, 173, 226, 0.2);
-  margin: 0;
-}
-
-.ministry-sub {
-  font-family: 'Cormorant Garamond', serif;
+.subtitle {
+  text-align: center;
+  color: #888;
   font-size: 13px;
-  color: #6b8faa;
-  margin-top: 6px;
-  font-style: italic;
+  margin-bottom: 30px;
+}
+
+.grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 16px;
+  max-width: 900px;
+  margin: 0 auto 30px;
+}
+
+.chart-container {
+  max-width: 900px;
+  margin: 0 auto 30px;
+  background: #16213e;
+  border-radius: 12px;
+  padding: 24px;
+  border: 1px solid #0f3460;
+}
+
+.chart-container h3 {
+  margin-bottom: 16px;
+  font-size: 14px;
+  color: #888;
 }
 
 .controls {
   max-width: 900px;
-  margin: 20px auto;
+  margin: 0 auto 20px;
   display: flex;
   gap: 12px;
   align-items: center;
-  padding: 0 16px;
-  flex-wrap: wrap;
 }
 
-.control-group {
-  display: flex;
-  align-items: center;
-  gap: 6px;
-}
-
-.control-group label {
-  font-family: 'Cormorant Garamond', serif;
+.controls input {
+  width: 80px;
+  padding: 8px 12px;
+  border: 1px solid #0f3460;
+  border-radius: 6px;
+  background: #16213e;
+  color: #eee;
   font-size: 14px;
-  color: #8b8b6b;
-  font-style: italic;
-}
-
-.control-group input {
-  width: 72px;
-  padding: 8px 10px;
-  background: #1a1008;
-  border: 1px solid #3d2820;
-  border-radius: 2px;
-  color: #e0d5c1;
-  font-family: 'Cormorant Garamond', serif;
-  font-size: 15px;
   text-align: center;
 }
 
-.btn-cast {
+.controls label {
+  font-size: 13px;
+  color: #888;
+}
+
+.btn {
   padding: 10px 24px;
-  border: 1px solid #8b0000;
-  border-radius: 2px;
-  font-family: 'Pirata One', serif;
-  font-size: 16px;
-  letter-spacing: 0.06em;
+  border: none;
+  border-radius: 6px;
+  font-size: 14px;
+  font-weight: 600;
   cursor: pointer;
-  color: #D4AF37;
-  background: linear-gradient(180deg, #740001, #5c0000);
-  text-shadow: 0 1px 2px rgba(0,0,0,0.5);
-  display: flex;
-  align-items: center;
-  gap: 6px;
   transition: all 0.15s;
 }
 
-.btn-cast:hover:not(:disabled) {
-  box-shadow: 0 0 20px rgba(116, 0, 1, 0.5);
+.btn-start {
+  background: #e74c3c;
+  color: #fff;
 }
 
-.btn-cast:disabled {
-  background: #3d2820;
-  border-color: #3d2820;
-  color: #665540;
+.btn-start:disabled {
+  background: #555;
   cursor: not-allowed;
 }
 
-.btn-spark { font-size: 14px; }
-
 .btn-reset {
-  padding: 10px 20px;
-  border: 1px solid #3d2820;
-  border-radius: 2px;
-  font-family: 'Cormorant Garamond', serif;
-  font-size: 14px;
-  cursor: pointer;
-  color: #8b7355;
-  background: #1e1610;
-  transition: all 0.15s;
-}
-
-.btn-reset:hover {
-  border-color: #D4AF37;
-  color: #D4AF37;
+  background: #2c3e50;
+  color: #ccc;
 }
 
 .status-badge {
   display: inline-block;
-  padding: 4px 14px;
-  border-radius: 2px;
-  font-family: 'Pirata One', serif;
-  font-size: 13px;
-  letter-spacing: 0.06em;
+  padding: 4px 12px;
+  border-radius: 20px;
+  font-size: 12px;
+  font-weight: 600;
 }
 
 .status-badge.idle {
-  background: #1e1610;
-  border: 1px solid #3d2820;
-  color: #665540;
+  background: #2c3e50;
+  color: #888;
 }
 
 .status-badge.running {
-  background: rgba(116, 0, 1, 0.2);
-  border: 1px solid #8b0000;
+  background: #e74c3c22;
   color: #e74c3c;
   animation: pulse 1s infinite;
 }
@@ -353,31 +324,5 @@ onUnmounted(() => {
 @keyframes pulse {
   0%, 100% { opacity: 1; }
   50% { opacity: 0.5; }
-}
-
-.stat-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-  gap: 16px;
-  max-width: 900px;
-  margin: 0 auto 24px;
-  padding: 0 16px;
-}
-
-.chart-section {
-  max-width: 900px;
-  margin: 0 auto 20px;
-  padding: 20px 24px;
-  background: linear-gradient(180deg, #1e1610, #1a1008);
-  border: 1px solid #3d2820;
-  border-radius: 4px;
-}
-
-.chart-title {
-  font-family: 'Pirata One', serif;
-  font-size: 15px;
-  color: #b8a080;
-  letter-spacing: 0.08em;
-  margin-bottom: 16px;
 }
 </style>
